@@ -1,0 +1,10 @@
+-- CreateEnum
+CREATE TYPE "KitStatus" AS ENUM ('NOT_REQUESTED', 'PICKUP_REQUESTED', 'PICKED_UP', 'IN_TRANSIT', 'TESTING', 'RESULTS_READY');
+
+-- AlterTable
+ALTER TABLE "users" ADD COLUMN     "inTransitAt" TIMESTAMP(3),
+ADD COLUMN     "kitStatus" "KitStatus" NOT NULL DEFAULT 'NOT_REQUESTED',
+ADD COLUMN     "pickedUpAt" TIMESTAMP(3),
+ADD COLUMN     "pickupRequestedAt" TIMESTAMP(3),
+ADD COLUMN     "resultsReadyAt" TIMESTAMP(3),
+ADD COLUMN     "testingAt" TIMESTAMP(3);

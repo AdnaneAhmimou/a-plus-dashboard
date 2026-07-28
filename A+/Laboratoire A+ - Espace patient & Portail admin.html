@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Laboratoire A+ — Espace patient & Portail admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #F7F5F8; }
+  body { font-family: 'Hanken Grotesk', system-ui, sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; color: #1E1822; }
+  button { font-family: inherit; }
+  input { font-family: inherit; }
+  input::placeholder { color: #A79FB0; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #E0D8E4; border-radius: 99px; border: 3px solid #F7F5F8; }
+  .row-h { transition: background .12s ease; }
+  .row-h:hover { background: #FBF4FA; }
+  .wcard-h { transition: box-shadow .15s ease, transform .15s ease; }
+  .wcard-h:hover { box-shadow: 0 8px 24px rgba(30,24,34,.08), 0 30px 60px rgba(92,22,87,.12); transform: translateY(-2px); }
+  .back-h:hover { color: #8A237F !important; }
+  button:hover { filter: brightness(0.98); }
+  .fade-in { animation: fadeIn .28s ease; }
+  @keyframes fadeIn { from { transform: translateY(7px); } to { transform: none; } }
+  .ai-dot { animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .ai-pulse { animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(138,35,127,.4); } 50% { transform: scale(1.05); box-shadow: 0 0 0 14px rgba(138,35,127,0); } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#ffffff"/>
+    <text x="24" y="66" font-family="Archivo, sans-serif" font-weight="900" font-size="52" fill="#8A237F">A</text>
+    <text x="60" y="46" font-family="Archivo, sans-serif" font-weight="900" font-size="30" fill="#8A237F">+</text>
+  </svg>
+</template>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="web-tokens.jsx"></script>
+<script type="text/babel" src="web-data.jsx"></script>
+<script type="text/babel" src="web-patient.jsx"></script>
+<script type="text/babel" src="web-admin.jsx"></script>
+<script type="text/babel" src="web-app.jsx"></script>
+</body>
+</html>

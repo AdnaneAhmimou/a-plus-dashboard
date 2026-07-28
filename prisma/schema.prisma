@@ -1,0 +1,260 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PATIENT
+  ADMIN
+  SUPER_ADMIN
+}
+
+// Lifecycle of a patient's DNA test box, from pickup request to results.
+// Lives on Box (not User) because the box is the physical object that
+// actually moves through this pipeline.
+enum KitStatus {
+  NOT_REQUESTED
+  PICKUP_REQUESTED
+  PICKED_UP
+  IN_TRANSIT
+  TESTING
+  RESULTS_READY
+}
+
+// Inventory lifecycle: AVAILABLE (in the lab, unused) -> SENT (handed to a
+// courier / on its way to a prospective client, no account yet) ->
+// ASSOCIATED (a patient has registered with this box's number).
+enum BoxStatus {
+  AVAILABLE
+  SENT
+  ASSOCIATED
+}
+
+model Box {
+  id     String    @id @default(cuid())
+  number String    @unique
+  status BoxStatus @default(AVAILABLE)
+
+  kitStatus         KitStatus @default(NOT_REQUESTED)
+  pickupRequestedAt DateTime?
+  pickedUpAt        DateTime?
+  inTransitAt       DateTime?
+  testingAt         DateTime?
+  resultsReadyAt    DateTime?
+
+  // Chrono Diali courier identifiers, set once a pickup is actually
+  // requested through their API. courierReferenceNumber is the
+  // consignment id — what tracking and the webhook key off of.
+  courierReferenceNumber String? @unique
+  courierPickupId        String?
+
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String? @unique
+
+  reports         Report[]
+  analysisResults AnalysisResult[]
+  courierEvents   CourierEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("boxes")
+}
+
+// Raw webhook events from Chrono Diali, kept for audit/debugging. Their
+// event `type` doesn't map 1:1 to our KitStatus (many, like
+// "assigned_courier_partner" or "on_hold", have no forward-progress
+// equivalent in our pipeline) — this preserves what we actually received
+// even when a given event was a no-op for KitStatus purposes.
+model CourierEvent {
+  id      String @id @default(cuid())
+  type    String
+  payload Json
+
+  box   Box?    @relation(fields: [boxId], references: [id], onDelete: SetNull)
+  boxId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([boxId])
+  @@map("courier_events")
+}
+
+// A DNA test report PDF for a box. Multiple rows per box = version
+// history (never overwritten in place); the highest `version` for a box
+// is the current one. Stored as bytes directly in Postgres rather than
+// on local disk or an external bucket — there's no cloud storage
+// credentials configured for this project, and local-disk storage would
+// silently break on any deployment target with an ephemeral filesystem.
+// Report PDFs at this scale (one per patient test, occasional re-issues)
+// are small enough that this is a legitimate, portable choice.
+model Report {
+  id       String @id @default(cuid())
+  version  Int
+  fileName String
+  fileSize Int
+  content  Bytes
+
+  box   Box    @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  boxId String
+
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+
+  analysisResults AnalysisResult[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([boxId, version])
+  @@index([boxId])
+  @@map("reports")
+}
+
+// The 6 fixed sections of the structured results view (mirrors the
+// reference genetic-testing platform's report layout). Fixed rather than
+// admin-defined because the AI extraction prompt targets exactly these six.
+enum AnalysisCategory {
+  HEALTH_CONDITIONS
+  HEREDITARY_CONDITIONS
+  PHARMACOLOGY
+  TRAITS
+  WELLNESS
+  ANCESTRY
+}
+
+// One trait/condition analysis within a category (e.g. "Acne vulgaris" under
+// Traits). Populated by AI extraction from an uploaded report PDF — see
+// src/lib/ai/extract-analysis.ts. Re-analyzing a report replaces the box's
+// entire result set (see the analyze route) rather than accumulating, so a
+// box always has exactly one current set of structured results, sourced
+// from whichever report was most recently analyzed.
+model AnalysisResult {
+  id       String           @id @default(cuid())
+  category AnalysisCategory
+  name     String
+  summary  String
+
+  description    String? @db.Text
+  probabilities  Json? // [{ label: string, percent: number }]
+  variantCount   String? // kept as free-form string — source PDFs format this inconsistently (e.g. "13.5 million")
+  riskLociCount  Int?
+  genesAnalyzed  String? @db.Text
+  technicalNotes String? @db.Text
+  bibliography   Json? // [{ label: string, url?: string }]
+
+  box   Box    @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  boxId String
+
+  sourceReport   Report? @relation(fields: [sourceReportId], references: [id], onDelete: SetNull)
+  sourceReportId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([boxId])
+  @@index([boxId, category])
+  @@map("analysis_results")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  phone         String?
+  role          Role      @default(PATIENT)
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Pickup address for the courier integration (Chrono Diali) — not
+  // collected at registration, only needed once a patient actually
+  // requests a pickup. Nullable: most of the flow works without it, and
+  // the pickup form asks for it inline the first time it's missing.
+  addressLine1 String?
+  city         String?
+  country      String? @default("Morocco")
+
+  box Box?
+
+  uploadedReports Report[]
+  notifications   Notification[]
+  pushTokens      PushToken[]
+
+  refreshTokens      RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@map("users")
+}
+
+// In-app notifications for a patient's box status changing. This is the
+// always-on channel — it never depends on external credentials. Firebase
+// web push (below) is a best-effort addition on top of it: every
+// notification created here also triggers a push if the user has
+// registered a device and a Firebase Admin service account is configured.
+// Deliberately scoped to patients: admins don't need to be notified about
+// actions they themselves just took.
+model Notification {
+  id      String  @id @default(cuid())
+  message String
+  read    Boolean @default(false)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+// One row per registered browser/device. A user can have several (phone +
+// laptop, or a re-registered token after clearing site data), so this is
+// a list, not a single column on User. Firebase issues a new token when an
+// old one goes stale — we upsert on `token` so re-registration doesn't
+// create duplicates, and prune a token here if FCM reports it as
+// unregistered when we try to send to it.
+model PushToken {
+  id    String @id @default(cuid())
+  token String @unique
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("push_tokens")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
