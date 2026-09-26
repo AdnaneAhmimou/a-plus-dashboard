@@ -5,7 +5,13 @@ import { errorResponse } from "@/lib/api-response";
 import { notifyKitStatusChange, getKitStatusPushPayload } from "@/lib/notifications";
 import { sendPushToUser } from "@/lib/firebase/admin";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+// 4 MB, not the 10 MB this used to allow: serverless platforms cap the
+// request body well below that (Vercel at 4.5 MB), so a larger limit is
+// one the server cannot honour — the upload would fail at the platform
+// with an opaque error instead of this route's clear message. Real
+// reports average 36 KB, so nothing legitimate comes close.
+const MAX_FILE_SIZE = 4 * 1024 * 1024;
+const MAX_FILE_SIZE_LABEL = "4 MB";
 const PDF_MAGIC_BYTES = "%PDF-";
 
 export async function POST(
@@ -39,7 +45,7 @@ export async function POST(
     return errorResponse("The uploaded file is empty", 400);
   }
   if (file.size > MAX_FILE_SIZE) {
-    return errorResponse("File exceeds the 10 MB size limit", 400);
+    return errorResponse(`File exceeds the ${MAX_FILE_SIZE_LABEL} size limit`, 400);
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
