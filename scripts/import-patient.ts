@@ -5,7 +5,7 @@
 //
 // Runs on a machine with a browser (not on Vercel: Playwright needs a
 // real Chromium). Credentials come from .env.tellmegen — see
-// src/lib/import/tellmegen-portal.ts.
+// scripts/lib/tellmegen-portal.ts.
 //
 // Flags:
 //   --box <number>   the A+ box to attach results to (else matched by kit barcode)
@@ -18,7 +18,7 @@ import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 
-import { TellmegenPortalSource } from "../src/lib/import/tellmegen-portal";
+import { TellmegenPortalSource } from "./lib/tellmegen-portal";
 import { importBundle } from "../src/lib/import/import-bundle";
 
 async function loadCredentials() {

@@ -1,3 +1,13 @@
+// Lives under scripts/, not src/, on purpose: this is the only module
+// that needs Playwright, and the deployed app must never depend on a
+// browser-automation package. Keeping it here means Vercel neither
+// type-checks it nor installs 31 MB of Playwright (whose postinstall
+// would also download a browser) for code it can never run.
+//
+// Requires Playwright to be available when you run the importer:
+//   npm i -D playwright   (or a global install)
+// It is deliberately not a project dependency.
+
 import path from "node:path";
 import { mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -12,8 +22,8 @@ import {
   type ImportedSection,
   type PatientResultBundle,
   type ResultSource,
-} from "./types";
-import { parseDetailText } from "./parse-detail";
+} from "../../src/lib/import/types";
+import { parseDetailText } from "../../src/lib/import/parse-detail";
 
 const BASE = "https://professionals.tellmegen.com";
 const STATE_FILE = path.join(process.cwd(), ".tellmegen-session.json");
@@ -402,7 +412,7 @@ export class TellmegenPortalSource implements ResultSource {
     warnings: string[]
   ): Promise<ImportedAncestry | null> {
     const { parseLineageText, parseNeanderthalText, dedupeNodes } = await import(
-      "./parse-ancestry"
+      "../../src/lib/import/parse-ancestry"
     );
 
     try {
