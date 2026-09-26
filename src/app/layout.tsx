@@ -2,24 +2,28 @@ import type { Metadata } from "next";
 import { Archivo, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
+// All three families are variable fonts, so no `weight` array is given:
+// omitting it fetches the single variable file covering the whole weight
+// range, instead of one static instance per listed weight. That is fewer
+// build-time requests to Google (the Vercel build failed inside
+// next/font's loader while fetching these), a smaller download for the
+// visitor, and it keeps every weight available rather than the five we
+// happened to list.
 const archivo = Archivo({
   subsets: ["latin"],
   variable: "--font-archivo",
-  weight: ["500", "600", "700", "800", "900"],
   display: "swap",
 });
 
 const hanken = Hanken_Grotesk({
   subsets: ["latin"],
   variable: "--font-hanken",
-  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
 const jbMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-jbmono",
-  weight: ["500", "600", "700"],
   display: "swap",
 });
 

@@ -42,5 +42,7 @@ next-env.d.ts
 tellmegen-export/
 
 # Real patient DNA report PDFs used as parser fixtures — personal health
-# data, deliberately kept out of git history.
-results/
+# data, deliberately kept out of git history. The leading slash anchors
+# this to the repo root: a bare "results/" also matched
+# src/components/results/ and silently dropped it from the commit.
+/results/
