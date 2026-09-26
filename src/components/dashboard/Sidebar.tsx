@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import {
   LayoutGrid,
   FlaskConical,
-  CalendarDays,
-  FileText,
+  // CalendarDays, // Appointments — re-enable with the nav entry below
+  // FileText,     // Documents — re-enable with the nav entry below
   Users,
   Package,
   Settings,
@@ -26,8 +26,11 @@ export interface NavItem {
 export const PATIENT_NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { href: "/dashboard/results", label: "My Results", icon: FlaskConical },
-  { href: "/dashboard/appointments", label: "Appointments", icon: CalendarDays },
-  { href: "/dashboard/documents", label: "Documents", icon: FileText },
+  // Hidden until the features behind them exist — linking to a page
+  // that does nothing is worse than not offering it. Uncomment both the
+  // entry and its icon import to bring one back.
+  // { href: "/dashboard/appointments", label: "Appointments", icon: CalendarDays },
+  // { href: "/dashboard/documents", label: "Documents", icon: FileText },
 ];
 
 export const ADMIN_NAV: NavItem[] = [
