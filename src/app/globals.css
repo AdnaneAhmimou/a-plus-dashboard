@@ -1,66 +1,160 @@
 @import "tailwindcss";
 
+/* Stock shadcn/ui structure with the A+ brand purple as `primary`.
+ *
+ * The palette is the shadcn neutral one for every surface, border and
+ * text token; the one substitution is `primary`, which drives buttons,
+ * active states, focus rings and chart accents. That keeps the calm
+ * neutral canvas that replaced the old all-purple theme while giving
+ * the brand the marks that actually mean something.
+ *
+ * The rest of the old brand system — tinted surfaces, body radial
+ * washes, frosted-glass cards — stays out of force; it is documented in
+ * DESIGN.md. Keep everything except `primary` and the accent as close to
+ * what `shadcn init` produces as possible, so upstream components drop
+ * in without surprises.
+ *
+ * The only additions are the status tokens below, which shadcn has no
+ * equivalent for and which this app genuinely needs: a medical UI has to
+ * be able to say normal / monitor / out-of-range, and shadcn ships only
+ * `destructive`. They are kept muted so they read as information rather
+ * than decoration.
+ */
+
 :root {
   --radius: 0.625rem;
 
-  --background: #f7f5f8;
-  --foreground: #1e1822;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
 
-  --card: #ffffff;
-  --card-foreground: #1e1822;
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
 
-  --popover: #ffffff;
-  --popover-foreground: #1e1822;
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
 
-  /* brand purple, sampled from the A+ logo */
-  --primary: #8a237f;
+  /* The A+ purple, sampled from the logo. Defined once here and reused
+     by primary and the accent so the two can never drift apart. */
+  --brand: #8a237f;
+  --brand-surface: #f5e9f4;
+
+  --primary: var(--brand);
+  --primary-foreground: oklch(0.985 0 0);
+
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: var(--brand);
+
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+
+  /* Accent (not part of shadcn): the same brand purple on its soft
+     tint, used for result and category icon badges. */
+  --accent-brand: var(--brand);
+  --accent-brand-surface: var(--brand-surface);
+
+  /* Status tokens (not part of shadcn; see the note above). */
+  --success: oklch(0.58 0.11 158);
+  --success-surface: oklch(0.96 0.02 158);
+  --warning: oklch(0.68 0.11 75);
+  --warning-surface: oklch(0.96 0.03 85);
+  --info: oklch(0.58 0.09 250);
+  --info-surface: oklch(0.96 0.02 250);
+  --destructive-surface: oklch(0.95 0.02 27);
+
+  /* Aliases kept so existing components resolve to stock neutrals rather
+     than needing a sweep of every className in the app. */
   --primary-hover: #6f1c67;
   --primary-deep: #5c1657;
   --primary-mid: #a83d9e;
-  --primary-foreground: #ffffff;
+  --ink-soft: oklch(0.37 0 0);
+  --faint: oklch(0.708 0 0);
+  --accent-2: oklch(0.985 0 0);
+  --accent-line: oklch(0.922 0 0);
+  --border-strong: oklch(0.708 0 0);
+}
 
-  --secondary: #f5e9f4;
-  --secondary-foreground: #8a237f;
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
 
-  --muted: #f3eff5;
-  --muted-foreground: #7a7183;
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
 
-  --accent: #f5e9f4;
-  --accent-foreground: #8a237f;
-  --accent-2: #fbf4fa;
-  --accent-line: #ecd8ea;
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
 
-  --ink-soft: #463c4e;
-  --faint: #a79fb0;
+  /* Lifted for contrast on a dark ground; the deep logo purple goes
+     muddy against near-black. */
+  --brand: #c778bd;
+  --brand-surface: oklch(0.269 0.03 330);
 
-  --destructive: #c63f52;
-  --destructive-surface: #f8e1e4;
-  --destructive-foreground: #ffffff;
+  --primary: var(--brand);
+  --primary-foreground: oklch(0.205 0 0);
 
-  --success: #2e9a6b;
-  --success-surface: #e1f3eb;
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
 
-  --warning: #c98a1e;
-  --warning-surface: #f8eed6;
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
 
-  --info: #3e6fb0;
-  --info-surface: #e4ecf6;
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
 
-  --border: #ece7ef;
-  --border-strong: #a83d9e;
-  --input: #ece7ef;
-  --ring: #8a237f;
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
 
-  --shadow-sm: 0 1px 2px rgba(30, 24, 34, 0.05), 0 4px 14px rgba(92, 22, 87, 0.05);
-  --shadow: 0 1px 2px rgba(30, 24, 34, 0.05), 0 12px 32px rgba(92, 22, 87, 0.07);
-  --shadow-lg: 0 8px 24px rgba(30, 24, 34, 0.08), 0 30px 60px rgba(92, 22, 87, 0.12);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: var(--brand);
+
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+
+  --success: oklch(0.7 0.12 158);
+  --success-surface: oklch(0.27 0.04 158);
+  --warning: oklch(0.78 0.12 75);
+  --warning-surface: oklch(0.29 0.05 85);
+  --info: oklch(0.7 0.1 250);
+  --info-surface: oklch(0.27 0.04 250);
+  --destructive-surface: oklch(0.28 0.05 27);
+
+  --accent-brand: var(--brand);
+  --accent-brand-surface: var(--brand-surface);
+
+  --primary-hover: #d9a5d3;
+  --primary-deep: #e9c9e5;
+  --primary-mid: #a83d9e;
+  --ink-soft: oklch(0.87 0 0);
+  --faint: oklch(0.556 0 0);
+  --accent-2: oklch(0.269 0 0);
+  --accent-line: oklch(1 0 0 / 10%);
+  --border-strong: oklch(0.556 0 0);
 }
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 6px);
+  --radius-xl: calc(var(--radius) + 4px);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -72,10 +166,10 @@
   --color-popover-foreground: var(--popover-foreground);
 
   --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
   --color-primary-deep: var(--primary-deep);
   --color-primary-mid: var(--primary-mid);
-  --color-primary-foreground: var(--primary-foreground);
 
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -92,15 +186,16 @@
   --color-faint: var(--faint);
 
   --color-destructive: var(--destructive);
-  --color-destructive-surface: var(--destructive-surface);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-surface: var(--destructive-surface);
+
+  --color-accent-brand: var(--accent-brand);
+  --color-accent-brand-surface: var(--accent-brand-surface);
 
   --color-success: var(--success);
   --color-success-surface: var(--success-surface);
-
   --color-warning: var(--warning);
   --color-warning-surface: var(--warning-surface);
-
   --color-info: var(--info);
   --color-info-surface: var(--info-surface);
 
@@ -109,9 +204,11 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --shadow-sm: var(--shadow-sm);
-  --shadow: var(--shadow);
-  --shadow-lg: var(--shadow-lg);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
 
   --font-sans: var(--font-hanken), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, sans-serif;

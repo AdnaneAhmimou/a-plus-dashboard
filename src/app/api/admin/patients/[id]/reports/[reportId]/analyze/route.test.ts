@@ -101,7 +101,7 @@ describe("POST /api/admin/patients/[id]/reports/[reportId]/analyze", () => {
     expect(res.status).toBe(422);
   });
 
-  it("replaces the box's analysis results and links them to the source report", async () => {
+  it("replaces this report's analysis results (not the whole box's) and links them to the source report", async () => {
     prismaMock.user.findUnique.mockResolvedValue(patientWithBox);
     prismaMock.report.findUnique.mockResolvedValue(report);
     extractStructuredAnalysis.mockResolvedValue([
@@ -115,7 +115,7 @@ describe("POST /api/admin/patients/[id]/reports/[reportId]/analyze", () => {
     expect(res.status).toBe(200);
     expect(body.count).toBe(2);
     expect(prismaMock.analysisResult.deleteMany).toHaveBeenCalledWith({
-      where: { boxId: "box_1" },
+      where: { sourceReportId: "report_1" },
     });
     expect(prismaMock.analysisResult.createMany).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -30,6 +30,59 @@ export async function notifyKitStatusChange(
   await db.notification.create({ data: { userId, message } });
 }
 
+// Structurally typed the same way as NotificationCreator above.
+interface AdminNotifier {
+  user: {
+    findMany: (args: {
+      where: { role: { in: ("ADMIN" | "SUPER_ADMIN")[] } };
+      select: { id: true };
+    }) => Promise<{ id: string }[]>;
+  };
+  notification: {
+    createMany: (args: {
+      data: { userId: string; message: string }[];
+    }) => Promise<unknown>;
+  };
+}
+
+// The admin side of the notification system: a pickup request is the one
+// patient-triggered event admins actually need to act on (dispatch the
+// courier), so every ADMIN/SUPER_ADMIN gets notified, unlike kit-status
+// changes which stay patient-only. Returns the notified admin IDs so the
+// caller can also push to them (outside the transaction, same pattern as
+// notifyKitStatusChange's push counterpart).
+export async function notifyAdminsOfPickupRequest(
+  db: AdminNotifier,
+  patientName: string,
+  boxNumber: string | null
+): Promise<string[]> {
+  const admins = await db.user.findMany({
+    where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } },
+    select: { id: true },
+  });
+  if (admins.length === 0) return [];
+
+  const message = `${patientName} requested a pickup${
+    boxNumber ? ` for box ${boxNumber}` : ""
+  }.`;
+  await db.notification.createMany({
+    data: admins.map((admin) => ({ userId: admin.id, message })),
+  });
+  return admins.map((admin) => admin.id);
+}
+
+export function getAdminPickupRequestPushPayload(
+  patientName: string,
+  boxNumber: string | null
+): { title: string; body: string } {
+  return {
+    title: "A+ Laboratory",
+    body: `${patientName} requested a pickup${
+      boxNumber ? ` for box ${boxNumber}` : ""
+    }.`,
+  };
+}
+
 // Push notifications are sent outside the DB transaction (a network call
 // has no place holding a transaction open), so callers need the same
 // copy for both: the in-app Notification row and the push payload.

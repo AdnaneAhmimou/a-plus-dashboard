@@ -4,7 +4,12 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getSessionFromRequest } from "@/lib/auth/session";
 import { errorResponse, zodErrorResponse } from "@/lib/api-response";
-import { notifyKitStatusChange, getKitStatusPushPayload } from "@/lib/notifications";
+import {
+  notifyKitStatusChange,
+  getKitStatusPushPayload,
+  notifyAdminsOfPickupRequest,
+  getAdminPickupRequestPushPayload,
+} from "@/lib/notifications";
 import { sendPushToUser } from "@/lib/firebase/admin";
 import {
   createConsignment,
@@ -112,15 +117,30 @@ export async function POST(req: NextRequest) {
       },
     });
     await notifyKitStatusChange(tx, user.id, "PICKUP_REQUESTED");
-    return box;
+    const notifiedAdminIds = await notifyAdminsOfPickupRequest(
+      tx,
+      `${user.firstName} ${user.lastName}`,
+      user.box!.number
+    );
+    return { box, notifiedAdminIds };
   });
 
   const pushPayload = getKitStatusPushPayload("PICKUP_REQUESTED");
   if (pushPayload) await sendPushToUser(user.id, pushPayload);
 
+  const adminPushPayload = getAdminPickupRequestPushPayload(
+    `${user.firstName} ${user.lastName}`,
+    updated.box.number
+  );
+  await Promise.all(
+    updated.notifiedAdminIds.map((adminId) =>
+      sendPushToUser(adminId, adminPushPayload)
+    )
+  );
+
   return NextResponse.json({
-    kitStatus: updated.kitStatus,
-    pickupRequestedAt: updated.pickupRequestedAt,
-    courierReferenceNumber: updated.courierReferenceNumber,
+    kitStatus: updated.box.kitStatus,
+    pickupRequestedAt: updated.box.pickupRequestedAt,
+    courierReferenceNumber: updated.box.courierReferenceNumber,
   });
 }

@@ -28,6 +28,15 @@ export default async function AdminPatientResultsPage({
   const categoryCounts = Object.fromEntries(
     categoryGroups.map((g) => [g.category, g._count._all])
   ) as Partial<Record<AnalysisCategory, number>>;
+  // The ancestry profile lives in its own table (one row per box), so it
+  // isn't in the groupBy above; surface it as a single "analysis".
+  const ancestryProfile = patient.box
+    ? await prisma.ancestryProfile.findUnique({
+        where: { boxId: patient.box.id },
+        select: { id: true },
+      })
+    : null;
+  if (ancestryProfile) categoryCounts.ANCESTRY = 1;
 
   return (
     <div>
@@ -48,7 +57,7 @@ export default async function AdminPatientResultsPage({
         </h1>
       </div>
 
-      {categoryGroups.length === 0 ? (
+      {categoryGroups.length === 0 && !ancestryProfile ? (
         <p className="text-sm font-medium text-muted-foreground">
           No structured results yet. Upload a report and analyze it with AI
           from the patient detail page.

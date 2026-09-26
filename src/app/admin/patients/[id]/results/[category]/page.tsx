@@ -4,6 +4,8 @@ import { ChevronLeft } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
 import { ResultsList } from "@/components/results/ResultsList";
+import { AncestrySection } from "@/components/results/ancestry/AncestrySection";
+import { toAncestryProfileData } from "@/lib/dashboard/ancestry-profile";
 import { CATEGORY_META, categoryFromSlug } from "@/lib/dashboard/analysis-categories";
 
 export default async function AdminCategoryResultsPage({
@@ -21,7 +23,12 @@ export default async function AdminCategoryResultsPage({
   });
   if (!patient || patient.role !== "PATIENT") notFound();
 
-  const results = patient.box
+  const ancestry =
+    category === "ANCESTRY" && patient.box
+      ? await prisma.ancestryProfile.findUnique({ where: { boxId: patient.box.id } })
+      : null;
+
+  const results = patient.box && category !== "ANCESTRY"
     ? await prisma.analysisResult.findMany({
         where: { boxId: patient.box.id, category },
         select: { id: true, name: true, summary: true },
@@ -48,7 +55,17 @@ export default async function AdminCategoryResultsPage({
         </h1>
       </div>
 
-      <ResultsList items={results} basePath={`/admin/patients/${id}/results/${slug}`} />
+      {category === "ANCESTRY" ? (
+        ancestry ? (
+          <AncestrySection profile={toAncestryProfileData(ancestry)} />
+        ) : (
+          <p className="text-sm font-medium text-muted-foreground">
+            No ancestry profile for this patient yet.
+          </p>
+        )
+      ) : (
+        <ResultsList items={results} basePath={`/admin/patients/${id}/results/${slug}`} />
+      )}
     </div>
   );
 }

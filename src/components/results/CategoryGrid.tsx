@@ -20,21 +20,32 @@ export function CategoryGrid({
         const Icon = meta.icon;
         return (
           <Link key={category} href={`${basePath}/${meta.slug}`}>
-            <Card className="h-full gap-3 p-5 transition-colors hover:border-primary/40">
+            <Card className="h-full gap-3 p-5 transition-colors hover:border-accent-brand/40 hover:bg-muted/40">
               <div className="flex items-start justify-between">
-                <div className="flex size-11 items-center justify-center rounded-xl bg-secondary">
-                  <Icon size={20} strokeWidth={1.8} className="text-primary" />
+                <div
+                  className="flex size-11 items-center justify-center rounded-xl"
+                  style={{ backgroundColor: "var(--accent-brand-surface)" }}
+                >
+                  <Icon
+                    size={20}
+                    strokeWidth={1.8}
+                    style={{ color: "var(--accent-brand)" }}
+                  />
                 </div>
-                <ChevronRight size={16} className="mt-1 text-faint" />
+                <ChevronRight size={16} className="mt-1 text-muted-foreground/50" />
               </div>
               <div>
                 <div className="font-display text-[15px] leading-tight font-bold text-foreground">
                   {meta.label}
                 </div>
                 <p className="mt-1.5 text-xs font-medium text-muted-foreground">
-                  {count > 0
-                    ? `${count} ${count === 1 ? "analysis" : "analyses"}`
-                    : "No analyses yet"}
+                  {category === "ANCESTRY"
+                    ? count > 0
+                      ? "Composition, lineages and Neanderthal DNA"
+                      : "No ancestry profile yet"
+                    : count > 0
+                      ? `${count} ${count === 1 ? "analysis" : "analyses"}`
+                      : "No analyses yet"}
                 </p>
               </div>
             </Card>

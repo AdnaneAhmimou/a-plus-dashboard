@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
+import { getSummaryTone, type ZoneTone } from "@/lib/dashboard/result-type";
+import { getResultIcon } from "@/lib/dashboard/result-icons";
 
 export interface ResultListItemData {
   id: string;
@@ -9,6 +10,26 @@ export interface ResultListItemData {
   summary: string;
 }
 
+const TONE_DOT_CLASS: Record<ZoneTone, string> = {
+  success: "bg-success",
+  warning: "bg-warning",
+  destructive: "bg-destructive",
+  info: "bg-info",
+  neutral: "bg-muted-foreground",
+};
+
+/**
+ * A category's results as a grid of cards rather than one long list. A
+ * category can hold 100+ entries, and a single column of near-identical
+ * rows is both slow to scan and dull to look at; a grid fits three to a
+ * row on a laptop and the per-result icon gives the eye something to
+ * anchor on.
+ *
+ * The icon is matched to what the result is about (see result-icons.ts).
+ * It is decorative — every card still states its name and verdict in
+ * text, and the status dot keeps carrying the tone — so an imperfect
+ * icon match costs nothing.
+ */
 export function ResultsList({
   items,
   basePath,
@@ -27,27 +48,42 @@ export function ResultsList({
   }
 
   return (
-    <Card className="overflow-hidden p-0">
-      <ul className="divide-y divide-border">
-        {items.map((item) => (
-          <li key={item.id}>
-            <Link
-              href={`${basePath}/${item.id}`}
-              className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-muted/50"
-            >
-              <div className="min-w-0">
-                <div className="text-sm font-semibold text-foreground">
-                  {item.name}
-                </div>
-                <div className="mt-0.5 truncate text-xs font-medium text-muted-foreground">
-                  {item.summary}
-                </div>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {items.map((item) => {
+        const Icon = getResultIcon(item.name, item.summary);
+        return (
+          <Link key={item.id} href={`${basePath}/${item.id}`} className="group">
+            <Card className="h-full gap-0 p-5 transition-colors group-hover:border-accent-brand/40 group-hover:bg-muted/40">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <span
+                  aria-hidden
+                  className="flex size-12 shrink-0 items-center justify-center rounded-xl"
+                  style={{ backgroundColor: "var(--accent-brand-surface)" }}
+                >
+                  <Icon
+                    size={24}
+                    strokeWidth={1.7}
+                    style={{ color: "var(--accent-brand)" }}
+                  />
+                </span>
+                <span
+                  aria-hidden
+                  className={`mt-1 size-2.5 shrink-0 rounded-full ${
+                    TONE_DOT_CLASS[getSummaryTone(item.summary)]
+                  }`}
+                />
               </div>
-              <ChevronRight size={16} className="shrink-0 text-faint" />
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </Card>
+
+              <div className="font-display text-[15px] leading-snug font-bold text-foreground">
+                {item.name}
+              </div>
+              <div className="mt-1.5 text-[13px] leading-snug font-medium text-muted-foreground">
+                {item.summary}
+              </div>
+            </Card>
+          </Link>
+        );
+      })}
+    </div>
   );
 }

@@ -58,6 +58,8 @@ model Box {
   reports         Report[]
   analysisResults AnalysisResult[]
   courierEvents   CourierEvent[]
+  ancestryProfile AncestryProfile?
+  resultImports   ResultImport[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -138,13 +140,36 @@ model AnalysisResult {
   name     String
   summary  String
 
-  description    String? @db.Text
+  description    String? @db.Text // "what is this" intro paragraph
+  // The population-context sentence that follows the result headline in
+  // the source PDF (e.g. "90% of the world's population has a medium
+  // risk..."). Kept separate from `description` because the detail UI
+  // renders it as its own population-context panel, and the percentage
+  // inside it drives that panel's chart.
+  resultContext  String? @db.Text
   probabilities  Json? // [{ label: string, percent: number }]
   variantCount   String? // kept as free-form string — source PDFs format this inconsistently (e.g. "13.5 million")
   riskLociCount  Int?
   genesAnalyzed  String? @db.Text
-  technicalNotes String? @db.Text
+  technicalNotes String? @db.Text // "Technical report" section
   bibliography   Json? // [{ label: string, url?: string }]
+
+  // Patient-facing explanatory sections — deterministically extracted
+  // verbatim from the source PDF (see src/lib/ai/prepare-report-text.ts),
+  // not AI-generated. Any of these can be absent depending on the report
+  // type (e.g. a carrier-status report has no "Prevention" section).
+  causesAndRiskFactors String? @db.Text
+  symptoms             String? @db.Text
+  prevention           String? @db.Text
+  diseaseManagement    String? @db.Text
+  studyLimitations     String? @db.Text
+
+  // The source's own identifier for this result (e.g. tellmeGen's
+  // "61/0"). Set only for imported results; null for ones extracted from
+  // an uploaded PDF. Re-importing upserts on (boxId, externalId) so a
+  // second run updates rows instead of duplicating them.
+  externalId String?
+  sourceUrl  String?
 
   box   Box    @relation(fields: [boxId], references: [id], onDelete: Cascade)
   boxId String
@@ -155,9 +180,118 @@ model AnalysisResult {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([boxId, externalId])
   @@index([boxId])
   @@index([boxId, category])
   @@map("analysis_results")
+}
+
+// The Ancestry category is a different shape from every other one: it is
+// ONE profile per patient with four facets (composition, maternal line,
+// paternal line, Neanderthal), not a list of individual traits. So it
+// gets its own model rather than being forced into AnalysisResult rows,
+// and the Ancestry card routes to a dedicated four-tab page instead of
+// the generic per-trait list.
+model AncestryProfile {
+  id String @id @default(cuid())
+
+  box   Box    @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  boxId String @unique
+
+  // Nested breakdown, three levels deep, mirroring the source:
+  // [{ name: "Europe", percent: 81.4, children: [
+  //     { name: "Iberian Peninsula", percent: 48.4, children: [
+  //         { name: "Portugal", percent: 43.4, detected: true } ] } ] }]
+  // Top-level percents sum to ~100. Names are the source's own labels;
+  // the globe looks their coordinates up (see ancestry-geo.ts) and skips
+  // any it doesn't know rather than guessing a location.
+  composition Json
+
+  maternalHaplogroup    String?
+  maternalSubhaplogroup String?
+  // [{ era: "more than 150,000 years ago", haplogroup: "L", description?: "..." }]
+  // in chronological order — the migration path drawn on the globe.
+  maternalMigration     Json?
+
+  // Null for female patients: the Y chromosome isn't present, so the
+  // paternal line can only come from a male relative's test.
+  paternalHaplogroup    String?
+  paternalSubhaplogroup String?
+  paternalMigration     Json?
+
+  neanderthalPercent   Float? // e.g. 1.5 (% of genome)
+  neanderthalVariants  Int? // e.g. 418 variants detected
+  neanderthalVsAverage Float? // e.g. 5.29 (% more than the average client; negative = less)
+  // [{ title: "Origin and extinction", text: "..." }] — the source's
+  // educational sections, verbatim.
+  neanderthalSections  Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ancestry_profiles")
+}
+
+// Where a patient's results came from. PORTAL is the Playwright import
+// that drives the professionals portal with the lab's own credentials;
+// API is the same data pulled from tellmeGen's API once they publish
+// one. Both produce identical rows, so the switch is a config change.
+enum ImportSource {
+  TELLMEGEN_PORTAL
+  TELLMEGEN_API
+}
+
+enum ImportStatus {
+  RUNNING
+  COMPLETED
+  PARTIAL
+  FAILED
+}
+
+// One run of the importer against one box. Kept as a record (rather than
+// just overwriting results) so an admin can see when a patient's data was
+// last pulled, how much came back, and what failed if anything did.
+model ResultImport {
+  id      String       @id @default(cuid())
+  source  ImportSource
+  status  ImportStatus @default(RUNNING)
+  barcode String
+
+  itemsFound    Int @default(0)
+  itemsImported Int @default(0)
+  error         String? @db.Text
+
+  box   Box    @relation(fields: [boxId], references: [id], onDelete: Cascade)
+  boxId String
+
+  captures SourceCapture[]
+
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  @@index([boxId])
+  @@map("result_imports")
+}
+
+// The raw text of one captured source page, stored verbatim before any
+// parsing. Scraping is the slow and fragile step; parsing is cheap. With
+// the raw text kept, improving how we read a field means re-parsing in
+// seconds instead of driving the portal again for hours.
+model SourceCapture {
+  id         String @id @default(cuid())
+  section    String // the source's section key, e.g. "diseases"
+  externalId String // the source's own id for the item, e.g. "61/0"
+  url        String
+  rawText    String @db.Text
+
+  import   ResultImport @relation(fields: [importId], references: [id], onDelete: Cascade)
+  importId String
+
+  createdAt DateTime @default(now())
+
+  @@unique([importId, section, externalId])
+  @@index([importId])
+  @@map("source_captures")
 }
 
 model User {

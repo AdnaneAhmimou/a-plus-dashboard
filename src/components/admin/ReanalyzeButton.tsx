@@ -4,17 +4,18 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Sparkles } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { ApiError, postJson } from "@/lib/auth/api-client";
 
-export function AnalyzeReportButton({
+// Per-row re-analyze action in the report list — each report is now an
+// independent single-trait PDF (not a version of one consolidated
+// report), so re-running AI extraction needs to target one specific
+// report, not "the latest one."
+export function ReanalyzeButton({
   patientId,
   reportId,
-  hasResults,
 }: {
   patientId: string;
   reportId: string;
-  hasResults: boolean;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -37,23 +38,26 @@ export function AnalyzeReportButton({
   }
 
   return (
-    <div>
-      <Button
+    <div className="relative">
+      <button
         type="button"
-        variant="outline"
-        size="sm"
         onClick={handleClick}
         disabled={loading}
+        aria-label="Re-analyze with AI"
+        title="Re-analyze with AI"
+        className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-primary disabled:opacity-50"
       >
         {loading ? (
-          <Loader2 size={14} className="animate-spin" />
+          <Loader2 size={16} className="animate-spin" />
         ) : (
-          <Sparkles size={14} />
+          <Sparkles size={16} />
         )}
-        {hasResults ? "Re-analyze with AI" : "Analyze with AI"}
-      </Button>
+      </button>
       {error && (
-        <p role="alert" className="mt-1.5 max-w-xs text-xs font-semibold text-destructive">
+        <p
+          role="alert"
+          className="absolute top-full right-0 z-10 mt-1 w-40 rounded-md border border-border bg-card p-2 text-[11px] font-semibold text-destructive shadow-md"
+        >
           {error}
         </p>
       )}

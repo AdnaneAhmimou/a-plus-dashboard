@@ -70,6 +70,11 @@ const LAB_DESTINATION: ChronoAddress = {
 // One DNA test box, en route from the patient to the lab. Creates the
 // trackable consignment — this is what generates the reference_number
 // that tracking, the label, and the webhook all key off of.
+//
+// No `pieces_detail` — Chrono Diali confirmed omitting it entirely
+// (rather than sending a single-piece array) is the correct shape for
+// this call; `boxNumber` is kept as a parameter for the caller's own
+// bookkeeping even though it's no longer sent in the request body.
 export async function createConsignment(patient: {
   name: string;
   phone: string;
@@ -99,17 +104,6 @@ export async function createConsignment(patient: {
         origin_details: origin,
         destination_details: LAB_DESTINATION,
         return_details: origin,
-        pieces_detail: [
-          {
-            description: `A+ Laboratory DNA test kit — box ${patient.boxNumber}`,
-            weight: "1",
-            weight_unit: "kg",
-            height: "20",
-            length: "20",
-            width: "20",
-            quantity: "1",
-          },
-        ],
       }),
     }
   );

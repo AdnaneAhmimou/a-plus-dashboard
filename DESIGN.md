@@ -1,14 +1,28 @@
 # A-Plus Laboratory — Design System
 
-A clean, modern, clinical-but-warm UI for the patient and admin portals,
-built on **shadcn/ui** primitives (Radix + Tailwind) with React Hook Form +
-Zod for validation. Plain, calm surfaces throughout — no motion effects,
-gradients, or decorative overlays on cards. Colors and component language
-are sampled directly from the real A+ brand
-(`A+/uploads/cropped-LOGO-...png`) and the internal design-reference
-prototype (`A+/web-tokens.jsx`, `A+/web-app.jsx`, `A+/web-patient.jsx`).
+> **⚠️ The visual system below is NOT in force. As of 2026-09-20 the app
+> uses stock shadcn/ui with its default neutral palette, by explicit
+> decision: the brand purple was judged too heavy across the UI.**
+>
+> What that means in practice:
+> - `src/app/globals.css` holds the unmodified shadcn neutral theme
+>   (light + dark). Primary is near-black, surfaces are white and grey.
+> - Cards are the stock shadcn card (border + `shadow-sm`). No frosted
+>   glass, no body radial washes, no translucent shell.
+> - Charts use a neutral grey ramp; the globe draws neutral markers.
+> - The only non-shadcn tokens are the status colours
+>   (success / warning / info / destructive surfaces), kept because a
+>   medical UI has to distinguish normal / monitor / out-of-range and
+>   shadcn ships only `destructive`.
+>
+> Sections 1 to 3 and the component styling notes below describe the
+> previous brand system. They are kept as a record of what was built and
+> why, so it can be reinstated deliberately rather than rediscovered.
+> **Do not apply them to new work without being asked.** Everything from
+> §4 onward that describes behaviour, data flow, routes and architecture
+> is still accurate and still applies.
 
-## 1. Visual Theme & Atmosphere
+## 1. Visual Theme & Atmosphere (superseded, see the note above)
 
 The portal reads as calm and trustworthy rather than clinical-sterile: a
 soft near-white lavender-gray canvas holds crisp white cards, with the
@@ -30,7 +44,7 @@ dashboard, not a marketing page — clarity over decoration.
 - 11–18px radii depending on surface size (chips are full pill); nothing sharp-cornered
 - Plain cards everywhere: border + shadow only, no motion/gradient/texture effects
 
-## 2. Color Palette & Roles
+## 2. Color Palette & Roles (superseded, see the note above)
 
 ### Brand purple (sampled from the A+ logo)
 | Token | Hex | Role |
@@ -43,16 +57,27 @@ dashboard, not a marketing page — clarity over decoration.
 | **Purple Line** | `#ECD8EA` | Border on purple-tinted cards/banners |
 
 ### Neutrals
-| Token | Hex | Role |
-|---|---|---|
-| **Canvas** | `#F7F5F8` | Page background |
-| **Card** | `#FFFFFF` | Card/surface fill |
-| **Ink** | `#1E1822` | Primary heading/body text |
-| **Ink Soft** | `#463C4E` | Secondary body text |
-| **Muted** | `#7A7183` | Labels, metadata, timestamps |
-| **Faint** | `#A79FB0` | Placeholder text, disabled icons, chart axis labels |
-| **Line** | `#ECE7EF` | Default border/divider |
-| **Line Soft** | `#F3EFF5` | Track backgrounds (progress bars, chart gridlines) |
+**The neutrals are true neutrals, not brand-tinted.** They were purple-
+tinted originally (`#F7F5F8` canvas, `#F5E9F4` fills, purple-cast
+shadows) and that wash across every panel read cheap and unprofessional.
+The brand purple now appears only on marks that *mean* something — the
+logo, primary actions, active nav, links, chart accents — never as a
+surface tint. Shadows are neutral (`rgba(16,24,40,…)`) for the same
+reason: coloured shadows were a big part of the amateur look.
+
+| Token | Hex | Role | Contrast on white |
+|---|---|---|---|
+| **Canvas** | `#F6F7F9` | Page background (+ fixed brand washes, see Cards) | — |
+| **Card** | `#FFFFFF` | Card/surface fill | — |
+| **Ink** | `#161A1F` | Primary heading/body text | 17.5:1 |
+| **Ink Soft** | `#475467` | Secondary body text | 7.7:1 |
+| **Muted** | `#667085` | Labels, metadata, timestamps | 5.0:1 |
+| **Faint** | `#98A2B3` | **Decorative only** — chevrons, dividers, disabled icons | 2.6:1 |
+| **Line** | `#E6E8EC` | Default border/divider | — |
+| **Line Soft** | `#F2F4F7` | Track backgrounds, chips, icon-badge fills | — |
+
+**Faint never carries text.** At 2.6:1 it fails AA, so it's reserved for
+decoration; any real label uses Muted (5.0:1) or darker.
 
 ### Semantic (status)
 | Token | Hex | Soft fill | Role |
@@ -112,20 +137,29 @@ back to `currentColor` instead of the theme's border token. **Don't
 hand-roll a shadcn primitive — pull it with the CLI, then restyle only
 via the existing CSS variables.**
 
-### Cards: plain, always
-Every card in the app is a bare `<Card>` — white fill, thin `border`,
-`shadow-sm`, no gradient, no hover animation, no background texture, no
-mouse-reactive effect of any kind. This was a deliberate reversal: an
-earlier revision wrapped cards in Aceternity UI motion components
-(`glowing-effect`, `wobble-card`) for a "glossy" look. That direction
-was rejected — it looked broken/distracting in practice (a noise
-texture rendering as loud static, content shifting under the cursor on
-hover) and, more fundamentally, wasn't the ask: this product should look
-like a clean, ordinary SaaS dashboard (calm white cards, plain borders),
-not a marketing site. **Don't reintroduce card-level motion/glow/texture
-effects.** If a future request specifically asks for that direction
-again, treat it as a real UI decision to confirm, not a default to reach
-for.
+### Cards: frosted glass, no motion (superseded — cards are the stock shadcn card)
+Every card is a `<Card>`, which applies the `.glass-surface` component
+class (`globals.css`): a white vertical gradient (90% -> 70% opacity),
+`backdrop-filter: blur(18px) saturate(160%)`, a hairline neutral border,
+and a white inset highlight along the top edge for the lit "gloss" line.
+`@supports not (backdrop-filter)` falls back to a solid card rather than
+a washed-out translucent one.
+
+For the blur to be visible at all, something has to sit behind it — so
+`body` paints three very low-opacity brand radial washes
+(`background-attachment: fixed`) that the glass picks up at its edges.
+This is why the layout wrappers must **not** set `bg-background`: an
+opaque wrapper would cover those washes and the glass would go flat.
+
+**History, because this reversed twice.** The original build wrapped
+cards in Aceternity motion components (`glowing-effect`, `wobble-card`);
+that was rejected for looking broken and distracting — a noise texture
+rendering as loud static, content shifting under the cursor. Cards were
+then plain for a long stretch. The current frosted treatment was asked
+for explicitly and is a different thing from what was rejected: it is
+**static**. There is still no hover animation, no mouse-reactive effect,
+and no content that moves under the pointer. Keep it that way — the
+objection was to motion and noise, not to depth.
 
 ### App shell
 `Sidebar` and `TopBar` (`src/components/dashboard/`) are shared between
@@ -293,40 +327,106 @@ patient (`/dashboard/results/[category]/...`) — same components, just a
 different `basePath` prop, same pattern as `ReportList`'s `showUploader`
 toggle.
 
-**Data model**: `AnalysisResult` belongs to a `Box` (not a `Report`
-directly) and optionally links back to the `Report` it was extracted
-from via `sourceReportId`. A box has exactly **one current set** of
-structured results at a time — re-analyzing a report deletes the box's
-existing `AnalysisResult` rows and inserts fresh ones inside a single
-`$transaction`, rather than accumulating across re-analyses. This
-mirrors the "one current PDF version, full history still queryable"
-model of `Report`, but deliberately simpler: provenance (which report
-produced these results) is kept via `sourceReportId`, but old *result*
-rows themselves are not kept once superseded — a re-analysis is a
-correction, not a new finding.
+**One PDF = one trait, not one consolidated report.** The real source
+data (exported from the reference platform) is one PDF per
+condition/trait — "Bone mineral density.pdf", "Hereditary hemochromatosis
+type 1 (HFE gene).pdf", etc., dozens per patient, uploaded as a batch.
+This replaced an earlier design (a single consolidated multi-category PDF
+per box) after seeing the real export format — see the postmortem below.
 
-**Pipeline: PDF → AI extraction → structured rows.** The admin uploads a
-report PDF (existing `Report` upload flow, unchanged) exported from the
-reference platform, then clicks "Analyze with AI"
-(`AnalyzeReportButton`, next to the upload form on the admin patient
-page) to POST `/api/admin/patients/[id]/reports/[reportId]/analyze`.
-That route: extracts text from the PDF (`pdf-parse`, via
-`src/lib/ai/extract-analysis.ts`), sends it to an LLM with a prompt
-requesting the exact JSON shape the dashboard needs, validates the
-response against `analysisExtractionSchema` (zod, in
-`src/lib/ai/analysis-schema.ts`) before writing anything, then replaces
-the box's `AnalysisResult` rows in a transaction.
+**Data model**: `AnalysisResult` belongs to a `Box` and links back to the
+specific `Report` it was extracted from via `sourceReportId`.
+Re-analyzing a report deletes and re-inserts **only that report's**
+`AnalysisResult` rows (`deleteMany({ where: { sourceReportId } })`), never
+the whole box's — a box now accumulates results from many independently
+uploaded PDFs, so re-analyzing PDF #12 must never touch the 11 already
+extracted. (This was a real bug during the multi-PDF rework: the
+original single-report-per-box code scoped the delete by `boxId`, which
+silently wiped every other trait's results on each new upload.)
+
+**Pipeline: PDF → deterministic parse → minimal AI classification →
+structured row.** The admin selects and uploads a batch of PDFs at once
+(`UploadReportForm`, `<input multiple>`) — each file is uploaded *and*
+analyzed automatically in sequence, with a per-file status list (no
+separate manual "Analyze" click per file needed). Per file:
+`extractStructuredAnalysis` (`src/lib/ai/extract-analysis.ts`) runs
+`pdf-parse` (wrapped in try/catch — some real exports fail at the
+PDF-library level with `bad XRef entry` or similar; this surfaces as a
+clean per-file error in the upload UI instead of crashing the batch),
+then hands the text to `prepareReportText`
+(`src/lib/ai/prepare-report-text.ts`) and a category-classification call,
+then writes the row.
+
+**Why deterministic parsing replaced full-AI extraction (anti-hallucination
+architecture).** The original version sent the entire report text to
+Claude and asked it to produce every field — result, gene list, risk loci
+count, bibliography, description — as JSON. Two problems with that: (1)
+gene lists and citations are exactly the kind of long, structured,
+easy-to-transcribe-wrong content LLMs are worst at reproducing exactly,
+and (2) it's needless risk, because these source PDFs turned out to be
+*extremely* regularly structured once inspected (verified against all 20
+real sample files in `/results` before writing the parser). Every report
+uses the same handful of literal section headers in whatever order they
+appear — `Your risk is` / `Your result is` / `Your genetic results
+indicate`, `Number of risk loci`, `Genes analyzed`, `Causes and
+non-genetic risk factors`, `Symptoms`, `Prevention`, `Disease
+management`, `Technical report`, `Bibliography`, `Study limitations` —
+so `prepareReportText` extracts **every one of those fields with plain
+string matching**, not a language model:
+
+- Result headline, risk loci count, variant count — regex against known
+  label text.
+- Gene list — collects ALL-CAPS symbol-looking lines following each
+  `Genes analyzed` header (multi-column PDF layouts repeat the header
+  once per column; every repeat is collected and deduped into one `Set`).
+  Monogenic/carrier reports don't have this header at all — instead a
+  variant-table row sometimes collapses into one jammed token during
+  text extraction (column order isn't even consistent row-to-row: both
+  `HFErs1800562GG` and `rs1799945HFECG` occur in real files), so two
+  regexes recover the gene symbol from either ordering.
+- Explanatory sections (causes, symptoms, prevention, disease management,
+  technical report, study limitations) — sliced verbatim between
+  consecutive known headers. Not rewritten or summarized by AI: the
+  source prose is already patient-appropriate, and copying it exactly has
+  zero hallucination risk by construction.
+- Bibliography — split into individual citations by flushing on a line
+  ending in `.` or `]` (verified this heuristic against the real
+  reference lists rather than assumed; PDF text extraction wraps a single
+  long citation across 2+ lines, so a naive "one line = one citation"
+  split would be wrong).
+
+**The AI's job is reduced to exactly one narrow decision**: which of the
+6 dashboard categories a trait belongs in
+(`requestCategoryClassification` in `src/lib/ai/openrouter.ts`), given a
+~800-character excerpt (title + intro + result headline only — not the
+full report). A single bounded classification call has a fundamentally
+smaller hallucination surface than open-ended transcription, and its
+output is validated against the same `analysisCategorySchema` zod enum
+either way. If a PDF doesn't match the expected structure at all (no
+recognizable result headline found), the pipeline throws a clear
+`AnalysisExtractionError` rather than guessing.
+
+**Risk-level color is deliberately conservative — see
+`src/components/results/RiskGauge.tsx`.** Only headlines that explicitly
+say "risk" get the success/warning/destructive traffic-light treatment,
+since that's the one case where low/medium/high has an unambiguous
+direction. Carrier-status wording (`Variant absent`/`present`) maps to
+success/info — "present" is informational, not alarming, since a single
+copy of a recessive variant is a carrier finding, not a diagnosis.
+Biomarker "levels"/"density" results stay neutral (info) always,
+regardless of Low/Average/High — this app has no per-trait clinical
+knowledge to know whether low or high is the favorable direction for a
+*specific* biomarker (low HDL is bad; low LDL is good), so it doesn't
+guess. Covered by `RiskGauge.test.ts`.
 
 **Provider: OpenRouter, not the Anthropic API directly** — the user's
 explicit choice (`OPEN_ROUTER_API_KEY` in `.env`, not
 `ANTHROPIC_API_KEY`), calling `anthropic/claude-sonnet-4.5` through
 OpenRouter's OpenAI-compatible `/chat/completions` endpoint via a plain
-`fetch` in `src/lib/ai/openrouter.ts` (no SDK — OpenRouter doesn't ship
-one, and its wire format isn't the Anthropic Messages API shape). If
-`OPEN_ROUTER_API_KEY` is unset, the analyze route returns a clear 503
-(`OpenRouterNotConfiguredError`) rather than failing silently or
-fabricating data — same pattern as how the Firebase gap was handled
-(build the real thing, flag what's genuinely blocked, don't fake it).
+`fetch` (no SDK — OpenRouter doesn't ship one, and its wire format isn't
+the Anthropic Messages API shape). If `OPEN_ROUTER_API_KEY` is unset, the
+analyze route returns a clear 503 (`OpenRouterNotConfiguredError`) rather
+than failing silently or fabricating data.
 
 **`pdf-parse` import gotcha**: import from `pdf-parse/lib/pdf-parse.js`,
 never the package root (`pdf-parse`). The package's `index.js` runs a
@@ -336,13 +436,129 @@ collection triggers exactly that condition and crashes the production
 build looking for a fixture file that only exists inside the package's
 own `node_modules` folder. See `src/types/pdf-parse-lib.d.ts` for the
 ambient type declaration this requires (the subpath has no shipped
-types).
+types). Separately, `pdf-parse` (via `pdfjs-dist`) throws on a subset of
+real-world exports — observed non-deterministically on the same file
+across separate process runs (`bad XRef entry`, `Illegal character: 41`)
+— so every call site wraps it in try/catch and surfaces a clean per-file
+error instead of crashing.
 
-**Why extract PDF text first instead of sending the PDF directly to the
-model**: keeps the request provider-agnostic (works with any
-OpenRouter-routed model, not just ones with native PDF/vision support)
-and avoids a large binary upload on every analysis; report PDFs at this
-scale (a lab panel) extract cleanly as text.
+**"Why not send the PDF directly to the model" / "why not convert to
+docx"**: same reasoning either way — extracting text first (already the
+existing behavior, not new) keeps the request provider-agnostic, costs
+far fewer tokens than a binary/vision upload, and — now that almost
+nothing is AI-generated — there's very little left in the request for
+the model to get wrong. Converting to DOCX wouldn't reduce tokens further
+than clean extracted text already does; it would just add a fragile
+conversion dependency for no benefit.
+
+### Result detail UI — three templates, one per report shape
+A single layout for every result read as thin, because the source
+reports aren't one shape. `detectResultType()`
+(`src/lib/dashboard/result-type.ts`) sorts them into three, derived from
+the result headline the parser already captures verbatim, and
+`ResultDetail` dispatches to the matching template in
+`src/components/results/templates/`:
+
+| Type | Headline wording | Hero |
+|---|---|---|
+| `RISK` | "Medium risk" | `RiskDonut` (ordinal Low/Medium/High) + `RiskSpectrum` + `PopulationDonut` |
+| `LEVELS` | "Average levels", "Low density" | `DistributionCurve` (bell curve, marker on the patient's zone) |
+| `CARRIER` | "Variant present/absent" | Binary status hero, no gauge — there's no scale to plot |
+
+Derived at render time rather than stored as a column: it's a pure
+function of wording already captured, so existing rows needed no
+backfill when this shipped.
+
+**Colour is assigned by what the zone means, not by taste**, and the
+status palette was run through the dataviz skill's validator rather than
+eyeballed. It passes with two conditions that every chart here honours:
+adjacent-pair CVD separation lands in the 6–8 band and the amber is
+under 3:1 contrast, so **every zone carries a visible text label and the
+segments are separated by a gap** — colour never carries the finding
+alone. Two deliberate restraints on top of that:
+- `RISK` is the only type that gets traffic-light tones, because it's
+  the only one where low/medium/high has an unambiguous direction.
+- `LEVELS` uses a **single-hue sequential ramp**, never good/bad colour.
+  Whether high or low is favourable is biomarker-specific clinical
+  knowledge this app doesn't have (low HDL is bad, low LDL is good), so
+  it must not imply one. The copy says "genetically predicted", never
+  "normal"/"abnormal", and a callout states it isn't a measured value.
+- `CARRIER` "present" is informational (info), never destructive —
+  one copy of a recessive variant is a carrier finding, not a diagnosis.
+
+Everything below the hero is shared (`blocks/ResultSections.tsx`) since
+it comes from the same source-PDF sections regardless of shape: what
+this means, what you can do, genes, disclaimer, causes, symptoms,
+technical report, bibliography.
+
+**"What you can do" is split, not summarised.** `splitIntoActionItems()`
+breaks the Prevention (or Disease-management) section into sentences and
+shows each verbatim as a checklist row, with a trailing-colon intro
+lifted out as a lead-in. No AI, no rewriting — the same anti-hallucination
+rule as the extractor. If the text doesn't split into at least two
+items it renders as prose instead.
+
+**Interactive bits**: gene chips collapse past 12 with a "+N more"
+toggle (some panels analyse 300+), long verbatim sections clamp with
+"Read more", and donut/spectrum/curve zones carry hover affordances and
+`<title>` tooltips. The category-list view (`ResultsList`) shows a
+tone dot per row, using the *same* `getSummaryTone()` the detail charts
+use so a result can't be one colour in the list and another on its page.
+
+### Ancestry section — one profile, four tabs, a globe
+
+Ancestry is a different shape from the other five categories: one profile
+per patient with four facets, not a list of traits. So it has its own
+Prisma model (`AncestryProfile`, one row per box) and the Ancestry card
+routes to `src/components/results/ancestry/AncestrySection.tsx` instead
+of `ResultsList`. Both `[category]/page.tsx` files (patient and admin)
+special-case `category === "ANCESTRY"`; the overview pages count a
+profile as one "analysis" so the card reads "Composition, lineages and
+Neanderthal DNA" rather than "No analyses yet".
+
+Tabs (a `role="tablist"` in a glass pill, active tab filled brand purple):
+
+- **Ancestry composition** — stacked bar + list (dot, region, %) on the
+  left, the globe on the right with one marker per region, sized by
+  share and labeled "Europe 81.4%". Categorical colours are the status
+  hues in fixed order (primary, info, success, warning), extra regions
+  fall back to muted grey; every slice is always named and numbered in
+  the list, so colour is never the only carrier.
+- **Maternal lineage** — hero card (haplogroup badge, `H → H1` chips,
+  one-line explanation of mtDNA inheritance), a migration timeline
+  (era, haplogroup, expandable description; the last step is "yours")
+  and the globe drawing arcs between consecutive haplogroup origin
+  areas.
+- **Paternal lineage** — same layout when a Y haplogroup exists; when
+  it is null an info card explains that the Y chromosome is absent (XX)
+  and that a male paternal relative's test carries the line.
+- **Neanderthal** — three stat cards (% of genome, variants detected,
+  vs average), a "you versus the average" bar pair (average derived as
+  `percent / (1 + vsAverage/100)`, only when both inputs exist) and the
+  source's educational sections as collapsible info cards.
+
+Map: two projections of the same data, switched by a Globe/Flat toggle
+(`AncestryMap.tsx`), with the choice remembered in localStorage across
+all four tabs. `GlobeAncestry.tsx` (cobe) is the CDN demo globe with the
+demo bits removed (no fake traffic counters, no pyramid).
+`FlatMapAncestry.tsx` is an equirectangular dot-matrix map drawn from a
+precomputed land mask (`scripts/build-world-mask.ts` bakes world-atlas
+geometry into a 1.7 KB base64 bitmask, so no map library ships to the
+browser). The flat view exists because a globe always hides half the
+world — markers in the Americas and East Asia cannot be seen together
+without dragging — and because its labels are plain SVG text that works
+in every browser. Where lineage markers cluster, flat-map labels are
+placed by marker weight and dropped when they would overlap; the dot,
+the tooltip and the list beside the map still carry every name. Coordinates come from `src/lib/dashboard/ancestry-geo.ts`,
+approximate region centroids and commonly cited haplogroup origin areas;
+anything not in those tables is simply not drawn, never guessed. The
+floating labels use CSS Anchor Positioning (Chromium only); the globe,
+arcs and drag work everywhere and the list beside it always carries the
+numbers.
+
+No ancestry PDF parser exists yet (none of the sample PDFs is an
+ancestry report). `scripts/seed-ancestry-sample.ts` seeds an
+illustrative profile for review, clearly marked as sample data.
 
 ### Admin Overview (`/admin`) — Analytics & Statistics
 Real numbers only, computed live from Postgres on every request (server
@@ -480,12 +696,29 @@ built, no-ops to the pre-integration behavior when
   order keeps the failure story simple: if consignment creation fails,
   nothing happened yet). A `CourierApiError` maps 4xx→400, other codes→502;
   local state (`Box.kitStatus`) is only written after both calls succeed.
+  No `pieces_detail` on the consignment call — confirmed with Chrono
+  Diali directly that it should be omitted, not sent as a single-item
+  array (see `CHRONO_DIALI_HANDOFF.md`).
+- **⚠️ Known blocker, unresolved as of this writing**: Chrono Diali
+  confirmed `total_items` on "Create a pickup" means the number of
+  consignments in that pickup call, and must be **> 1**. Our flow — one
+  patient, one box, one pickup call — only ever has exactly one
+  consignment ready at a time, so a pickup can never be created as
+  currently built. `createPickup()` still sends `total_items: "1"`,
+  which is expected to be rejected by their sandbox once real credentials
+  are added. Needs a product decision (batch multiple patients into one
+  pickup call? a different endpoint for single-item home pickups?) before
+  this can go live — see `CHRONO_DIALI_HANDOFF.md` for the open question
+  sent back to them.
 - **Webhook drives status automatically** — `POST
-  /api/webhooks/chrono-diali`. Chrono Diali's docs don't specify HMAC
-  signing, so a shared secret in the URL query string
-  (`CHRONO_DIALI_WEBHOOK_SECRET`) is the only auth available; if unset,
-  the endpoint accepts unauthenticated (better to receive real events
-  than silently drop them before the secret is set up).
+  /api/webhooks/chrono-diali`. Chrono Diali confirmed there's no HMAC
+  signing; auth is a shared key we generate and register with them, sent
+  back as a plain `Apikey` header (their term) on every delivery — not
+  the same value as `CHRONO_DIALI_API_KEY`, which authenticates our
+  *outbound* calls to them. `CHRONO_DIALI_WEBHOOK_SECRET` holds our side
+  of that shared value; if unset, the endpoint accepts unauthenticated
+  (better to receive real events than silently drop them before the
+  secret is registered).
   - Every event is recorded in `CourierEvent` regardless of outcome —
     audit trail, and useful for debugging when a courier event doesn't
     map to anything.

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/current-user";
+import { prisma } from "@/lib/prisma";
 import { Sidebar, ADMIN_NAV } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
 
@@ -19,8 +20,12 @@ export default async function AdminLayout({
     redirect("/dashboard");
   }
 
+  const unreadCount = await prisma.notification.count({
+    where: { userId: user.id, read: false },
+  });
+
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen">
       <Sidebar
         navItems={ADMIN_NAV}
         sectionLabel="Laboratory portal"
@@ -32,6 +37,8 @@ export default async function AdminLayout({
           lastName={user.lastName}
           roleLabel={ROLE_LABEL[user.role] ?? "Admin · A+"}
           searchPlaceholder="Search patients, box numbers..."
+          notificationHref="/admin/notifications"
+          unreadCount={unreadCount}
         />
         <main className="mx-auto w-full max-w-[1320px] flex-1 px-10 py-8">
           {children}

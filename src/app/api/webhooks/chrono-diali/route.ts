@@ -9,15 +9,17 @@ import { KIT_STATUS_TIMESTAMP_FIELD } from "@/lib/dashboard/kit-status";
 import { notifyKitStatusChange, getKitStatusPushPayload } from "@/lib/notifications";
 import { sendPushToUser } from "@/lib/firebase/admin";
 
-// Chrono Diali's docs don't specify HMAC signing for webhook deliveries,
-// so a shared secret in the URL (registered with them as part of the
-// webhook URL) is the only auth this endpoint has. If no secret is
-// configured we accept anyway — safer to receive unauthenticated events
-// than to silently drop real ones before the secret has been set up.
+// Chrono Diali confirmed there's no HMAC signing — auth is a shared key
+// we generate ourselves and give them, which they send back as a plain
+// "Apikey" header on every webhook delivery (their term, not ours; not
+// the same value as CHRONO_DIALI_API_KEY, which authenticates OUR
+// outbound calls to THEM). If no secret is configured we accept anyway —
+// safer to receive unauthenticated events than to silently drop real
+// ones before the secret has been registered with them.
 function isAuthorized(req: NextRequest): boolean {
   const expected = process.env.CHRONO_DIALI_WEBHOOK_SECRET;
   if (!expected) return true;
-  return req.nextUrl.searchParams.get("secret") === expected;
+  return req.headers.get("apikey") === expected;
 }
 
 // Always acknowledge with 200 for anything that isn't an auth/parsing

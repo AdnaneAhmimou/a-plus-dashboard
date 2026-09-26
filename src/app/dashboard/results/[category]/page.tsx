@@ -5,6 +5,8 @@ import { ChevronLeft } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { prisma } from "@/lib/prisma";
 import { ResultsList } from "@/components/results/ResultsList";
+import { AncestrySection } from "@/components/results/ancestry/AncestrySection";
+import { toAncestryProfileData } from "@/lib/dashboard/ancestry-profile";
 import { CATEGORY_META, categoryFromSlug } from "@/lib/dashboard/analysis-categories";
 
 export default async function PatientCategoryResultsPage({
@@ -19,7 +21,14 @@ export default async function PatientCategoryResultsPage({
   const category = categoryFromSlug(slug);
   if (!category) notFound();
 
-  const results = user.box
+  // Ancestry is one profile with four facets, not a list of traits, so it
+  // renders its own section instead of the generic per-trait list.
+  const ancestry =
+    category === "ANCESTRY" && user.box
+      ? await prisma.ancestryProfile.findUnique({ where: { boxId: user.box.id } })
+      : null;
+
+  const results = user.box && category !== "ANCESTRY"
     ? await prisma.analysisResult.findMany({
         where: { boxId: user.box.id, category },
         select: { id: true, name: true, summary: true },
@@ -46,7 +55,18 @@ export default async function PatientCategoryResultsPage({
         </h1>
       </div>
 
-      <ResultsList items={results} basePath={`/dashboard/results/${slug}`} />
+      {category === "ANCESTRY" ? (
+        ancestry ? (
+          <AncestrySection profile={toAncestryProfileData(ancestry)} />
+        ) : (
+          <p className="text-sm font-medium text-muted-foreground">
+            No ancestry profile yet. It will appear here once your ancestry
+            analysis has been added.
+          </p>
+        )
+      ) : (
+        <ResultsList items={results} basePath={`/dashboard/results/${slug}`} />
+      )}
     </div>
   );
 }

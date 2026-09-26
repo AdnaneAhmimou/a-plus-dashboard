@@ -56,7 +56,7 @@ export function TopBar({
   unreadCount?: number;
 }) {
   return (
-    <div className="sticky top-0 z-20 flex items-center gap-4 border-b border-border bg-background/85 px-8 py-4 backdrop-blur-md">
+    <div className="sticky top-0 z-20 flex items-center gap-4 border-b border-border bg-background px-8 py-4">
       <div className="relative w-80 max-w-[45vw]">
         <Search
           size={17}

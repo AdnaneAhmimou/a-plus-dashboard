@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { KitStatusBadge } from "@/components/admin/KitStatusBadge";
 import { AdvanceStatusButton } from "@/components/admin/AdvanceStatusButton";
 import { UploadReportForm } from "@/components/admin/UploadReportForm";
-import { AnalyzeReportButton } from "@/components/admin/AnalyzeReportButton";
 import { PatientInfoCard } from "@/components/admin/PatientInfoCard";
 import { ReportList } from "@/components/reports/ReportList";
 import { JourneyRail } from "@/components/dashboard/JourneyRail";
@@ -45,7 +44,6 @@ export default async function AdminPatientDetailPage({
   const analysisResultCount = patient.box
     ? await prisma.analysisResult.count({ where: { boxId: patient.box.id } })
     : 0;
-  const latestReport = reports[0];
 
   return (
     <div>
@@ -127,17 +125,9 @@ export default async function AdminPatientDetailPage({
             )}
           </div>
           <UploadReportForm patientId={patient.id} />
-          {latestReport && (
-            <div className="mt-3">
-              <AnalyzeReportButton
-                patientId={patient.id}
-                reportId={latestReport.id}
-                hasResults={analysisResultCount > 0}
-              />
-            </div>
-          )}
           <div className="mt-4">
             <ReportList
+              patientId={patient.id}
               reports={reports.map((r) => ({
                 id: r.id,
                 version: r.version,

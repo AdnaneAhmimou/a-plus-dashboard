@@ -1,5 +1,7 @@
 import { Download, FileText } from "lucide-react";
 
+import { ReanalyzeButton } from "@/components/admin/ReanalyzeButton";
+
 export interface ReportListItem {
   id: string;
   version: number;
@@ -18,9 +20,12 @@ function formatSize(bytes: number): string {
 export function ReportList({
   reports,
   showUploader = true,
+  patientId,
 }: {
   reports: ReportListItem[];
   showUploader?: boolean;
+  /** Admin context only — when set, each row gets a re-analyze action. */
+  patientId?: string;
 }) {
   if (reports.length === 0) {
     return (
@@ -54,6 +59,7 @@ export function ReportList({
               {showUploader && r.uploadedByName ? ` · ${r.uploadedByName}` : ""}
             </div>
           </div>
+          {patientId && <ReanalyzeButton patientId={patientId} reportId={r.id} />}
           <a
             href={`/api/reports/${r.id}/download`}
             className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-primary"

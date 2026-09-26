@@ -27,14 +27,23 @@ export const analysisItemSchema = z.object({
   name: z.string().min(1),
   summary: z.string().min(1),
   description: z.string().optional(),
+  resultContext: z.string().optional(),
   probabilities: z.array(probabilitySchema).optional(),
   variantCount: z.string().optional(),
   riskLociCount: z.number().int().optional(),
   genesAnalyzed: z.string().optional(),
   technicalNotes: z.string().optional(),
   bibliography: z.array(bibliographyEntrySchema).optional(),
+  causesAndRiskFactors: z.string().optional(),
+  symptoms: z.string().optional(),
+  prevention: z.string().optional(),
+  diseaseManagement: z.string().optional(),
+  studyLimitations: z.string().optional(),
 });
 
+// Still a "results" array for minimal disruption to callers, but each
+// source PDF now covers exactly one trait, so this always holds a single
+// item — see prepare-report-text.ts / extract-analysis.ts.
 export const analysisExtractionSchema = z.object({
   results: z.array(analysisItemSchema).min(1),
 });

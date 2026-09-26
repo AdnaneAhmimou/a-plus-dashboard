@@ -49,8 +49,13 @@ export async function POST(
   }
 
   const boxId = patient.box.id;
+  // Scoped to this report only — a box now accumulates results from many
+  // independently-uploaded single-trait PDFs, so re-analyzing one report
+  // must never touch the results already extracted from the others.
+  // (Re-analyzing the SAME report is still idempotent: its own prior
+  // results are cleared first so nothing duplicates.)
   await prisma.$transaction(async (tx) => {
-    await tx.analysisResult.deleteMany({ where: { boxId } });
+    await tx.analysisResult.deleteMany({ where: { sourceReportId: report.id } });
     await tx.analysisResult.createMany({
       data: results.map((r) => ({
         boxId,
@@ -59,12 +64,18 @@ export async function POST(
         name: r.name,
         summary: r.summary,
         description: r.description,
+        resultContext: r.resultContext,
         probabilities: r.probabilities,
         variantCount: r.variantCount,
         riskLociCount: r.riskLociCount,
         genesAnalyzed: r.genesAnalyzed,
         technicalNotes: r.technicalNotes,
         bibliography: r.bibliography,
+        causesAndRiskFactors: r.causesAndRiskFactors,
+        symptoms: r.symptoms,
+        prevention: r.prevention,
+        diseaseManagement: r.diseaseManagement,
+        studyLimitations: r.studyLimitations,
       })),
     });
   });

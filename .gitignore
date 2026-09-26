@@ -35,3 +35,12 @@ next-env.d.ts
 .vitest-result.json
 
 
+
+# tellmeGen portal scraping — credentials, saved session, exported patient data
+.env.tellmegen
+.tellmegen-session.json
+tellmegen-export/
+
+# Real patient DNA report PDFs used as parser fixtures — personal health
+# data, deliberately kept out of git history.
+results/

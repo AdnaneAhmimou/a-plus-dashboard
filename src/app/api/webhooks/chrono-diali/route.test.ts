@@ -6,13 +6,13 @@ vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }));
 
 import { POST } from "@/app/api/webhooks/chrono-diali/route";
 
-function makeRequest(body: unknown, secret?: string) {
-  const url = secret
-    ? `http://localhost/api/webhooks/chrono-diali?secret=${secret}`
-    : "http://localhost/api/webhooks/chrono-diali";
-  return new NextRequest(url, {
+function makeRequest(body: unknown, apikey?: string) {
+  return new NextRequest("http://localhost/api/webhooks/chrono-diali", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(apikey ? { apikey } : {}),
+    },
     body: JSON.stringify(body),
   });
 }
@@ -26,7 +26,7 @@ describe("POST /api/webhooks/chrono-diali", () => {
     delete process.env.CHRONO_DIALI_WEBHOOK_SECRET;
   });
 
-  it("rejects requests with the wrong secret when one is configured", async () => {
+  it("rejects requests with the wrong Apikey header when a secret is configured", async () => {
     process.env.CHRONO_DIALI_WEBHOOK_SECRET = "correct-secret";
     const res = await POST(
       makeRequest({ type: "delivered", reference_number: "REF1" }, "wrong")
@@ -38,6 +38,18 @@ describe("POST /api/webhooks/chrono-diali", () => {
   it("accepts requests when no secret is configured", async () => {
     prismaMock.box.findUnique.mockResolvedValue(null);
     const res = await POST(makeRequest({ type: "pickup_completed", reference_number: "REF1" }));
+    expect(res.status).toBe(200);
+  });
+
+  it("accepts requests with the correct Apikey header when a secret is configured", async () => {
+    process.env.CHRONO_DIALI_WEBHOOK_SECRET = "correct-secret";
+    prismaMock.box.findUnique.mockResolvedValue(null);
+    const res = await POST(
+      makeRequest(
+        { type: "pickup_completed", reference_number: "REF1" },
+        "correct-secret"
+      )
+    );
     expect(res.status).toBe(200);
   });
 

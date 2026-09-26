@@ -19,6 +19,7 @@
     "bcryptjs": "2.4.3",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
+    "cobe": "^2.0.1",
     "firebase": "^12.16.0",
     "firebase-admin": "^14.2.0",
     "jose": "6.2.3",
@@ -40,12 +41,15 @@
     "@types/pdf-parse": "^1.1.5",
     "@types/react": "19.0.4",
     "@types/react-dom": "19.0.2",
+    "@types/topojson-client": "^3.1.5",
     "eslint": "9.18.0",
     "eslint-config-next": "15.5.20",
     "prisma": "6.2.1",
     "tailwindcss": "4.3.3",
+    "topojson-client": "^3.1.0",
     "typescript": "5.7.3",
-    "vitest": "3.2.7"
+    "vitest": "3.2.7",
+    "world-atlas": "^2.0.2"
   },
   "allowScripts": {
     "@prisma/client@6.2.1": true,

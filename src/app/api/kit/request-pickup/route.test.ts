@@ -64,6 +64,9 @@ describe("POST /api/kit/request-pickup", () => {
     courierMocks.isCourierConfigured.mockReturnValue(false);
     courierMocks.createConsignment.mockReset();
     courierMocks.createPickup.mockReset();
+    // No admins to notify by default — tests that care about the admin
+    // notification path override this explicitly.
+    prismaMock.user.findMany.mockResolvedValue([]);
   });
 
   it("returns 401 when not authenticated", async () => {
@@ -84,11 +87,14 @@ describe("POST /api/kit/request-pickup", () => {
   it("requests a pickup and sets the box's kitStatus to PICKUP_REQUESTED", async () => {
     prismaMock.user.findUnique.mockResolvedValue({
       id: "user_1",
-      box: { id: "box_1", kitStatus: "NOT_REQUESTED" },
+      firstName: "Nadia",
+      lastName: "Chraibi",
+      box: { id: "box_1", kitStatus: "NOT_REQUESTED", number: "APL-1" },
     });
     prismaMock.box.update.mockResolvedValue({
       kitStatus: "PICKUP_REQUESTED",
       pickupRequestedAt: new Date("2026-07-19T00:00:00Z"),
+      number: "APL-1",
     });
 
     const res = await POST(await makeRequest());
@@ -108,6 +114,38 @@ describe("POST /api/kit/request-pickup", () => {
       })
     );
     expect(courierMocks.createConsignment).not.toHaveBeenCalled();
+  });
+
+  it("notifies every admin when a patient requests a pickup", async () => {
+    prismaMock.user.findUnique.mockResolvedValue({
+      id: "user_1",
+      firstName: "Nadia",
+      lastName: "Chraibi",
+      box: { id: "box_1", kitStatus: "NOT_REQUESTED", number: "APL-1" },
+    });
+    prismaMock.box.update.mockResolvedValue({
+      kitStatus: "PICKUP_REQUESTED",
+      pickupRequestedAt: new Date("2026-07-19T00:00:00Z"),
+      number: "APL-1",
+    });
+    prismaMock.user.findMany.mockResolvedValue([
+      { id: "admin_1" },
+      { id: "admin_2" },
+    ]);
+
+    const res = await POST(await makeRequest());
+    expect(res.status).toBe(200);
+    expect(prismaMock.user.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } },
+      })
+    );
+    expect(prismaMock.notification.createMany).toHaveBeenCalledWith({
+      data: [
+        expect.objectContaining({ userId: "admin_1" }),
+        expect.objectContaining({ userId: "admin_2" }),
+      ],
+    });
   });
 
   it("rejects a duplicate pickup request with 409", async () => {
