@@ -483,24 +483,6 @@ function itemIdOf(row: CachedRow): number | null {
   return row.itemId ?? row.idImputation ?? null;
 }
 
-// The portal shows the empty state ("No data available") and a loading
-// strip while fetching, so those must both be gone before the list counts
-// as rendered.
-async function waitForList(page: Page) {
-  await page
-    .waitForFunction(
-      () => {
-        const t = document.querySelector("main")?.innerText ?? "";
-        if (/loadingText|Loading\.\.\./i.test(t)) return false;
-        if (/No data available/i.test(t)) return false;
-        return t.trim().length > 200;
-      },
-      null,
-      { timeout: 45000 }
-    )
-    .catch(() => {});
-}
-
 async function waitForDetail(page: Page) {
   await page
     .waitForFunction(
