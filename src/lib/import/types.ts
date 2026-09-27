@@ -27,7 +27,16 @@ export interface ImportedResult {
   variantCount?: string;
   riskLociCount?: number;
   genesAnalyzed?: string;
+
+  // The explanatory prose a patient reads: what raises the risk, what
+  // the symptoms are, what they can do about it.
+  causesAndRiskFactors?: string;
+  symptoms?: string;
+  prevention?: string;
+  diseaseManagement?: string;
   technicalNotes?: string;
+  studyLimitations?: string;
+  bibliography?: { label: string }[];
 }
 
 export interface ImportedSection {

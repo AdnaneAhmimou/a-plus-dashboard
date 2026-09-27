@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Globe, Map as MapIcon } from "lucide-react";
 
+import { useTranslations } from "next-intl";
+
 import { GlobeAncestry, type GlobeArc, type GlobeMarker } from "./GlobeAncestry";
 import { FlatMapAncestry } from "./FlatMapAncestry";
 
@@ -35,6 +37,7 @@ export function AncestryMap({
   // Always render the globe first so the server and the first client
   // paint agree; the stored preference is applied after mount.
   const [view, setView] = useState<MapView>("globe");
+  const t = useTranslations("ancestry");
 
   useEffect(() => {
     try {
@@ -58,20 +61,20 @@ export function AncestryMap({
     <div className={`flex w-full flex-col items-center gap-3 ${className}`}>
       <div
         role="group"
-        aria-label="Map view"
+        aria-label={t("mapView")}
         className="flex gap-1 self-end rounded-lg bg-muted p-1"
       >
         <ViewButton
           active={view === "globe"}
           onClick={() => choose("globe")}
           icon={<Globe size={14} strokeWidth={2} />}
-          label="Globe"
+          label={t("globe")}
         />
         <ViewButton
           active={view === "flat"}
           onClick={() => choose("flat")}
           icon={<MapIcon size={14} strokeWidth={2} />}
-          label="Flat"
+          label={t("flat")}
         />
       </div>
 
@@ -90,7 +93,7 @@ export function AncestryMap({
         <p className="text-center text-xs font-semibold text-muted-foreground">
           {view === "globe"
             ? caption
-            : "Every region at once. Drag is only available on the globe."}
+            : t("flatCaption")}
         </p>
       )}
     </div>

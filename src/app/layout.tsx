@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { Archivo, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale } from "next-intl/server";
+
+import { localeDir, type Locale } from "@/lib/i18n/locales";
 import "./globals.css";
 
 // All three families are variable fonts, so no `weight` array is given:
@@ -32,21 +36,28 @@ export const metadata: Metadata = {
   description: "DNA test tracking and results for A-Plus Laboratory patients.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Locale comes from the cookie (see src/i18n/request.ts). `dir` is set
+  // here rather than anywhere lower down because mirroring the interface
+  // for Arabic has to apply to the whole document, including the
+  // scrollbar and any portalled overlay.
+  const locale = (await getLocale()) as Locale;
+
   return (
     <html
-      lang="en"
+      lang={locale}
+      dir={localeDir(locale)}
       className={`${archivo.variable} ${hanken.variable} ${jbMono.variable}`}
     >
       <body
         className="min-h-screen font-sans antialiased"
         suppressHydrationWarning
       >
-        {children}
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>
   );

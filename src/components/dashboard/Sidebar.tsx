@@ -14,41 +14,45 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { useTranslations } from "next-intl";
+
 import { Logo } from "@/components/brand/Logo";
 import { cn } from "@/lib/utils";
 
 export interface NavItem {
   href: string;
-  label: string;
+  /** Key under the "nav" namespace in messages/*.json, not a literal. */
+  labelKey: string;
   icon: LucideIcon;
 }
 
 export const PATIENT_NAV: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
-  { href: "/dashboard/results", label: "My Results", icon: FlaskConical },
+  { href: "/dashboard", labelKey: "dashboard", icon: LayoutGrid },
+  { href: "/dashboard/results", labelKey: "myResults", icon: FlaskConical },
   // Hidden until the features behind them exist — linking to a page
   // that does nothing is worse than not offering it. Uncomment both the
   // entry and its icon import to bring one back.
-  // { href: "/dashboard/appointments", label: "Appointments", icon: CalendarDays },
-  // { href: "/dashboard/documents", label: "Documents", icon: FileText },
+  // { href: "/dashboard/appointments", labelKey: "appointments", icon: CalendarDays },
+  // { href: "/dashboard/documents", labelKey: "documents", icon: FileText },
 ];
 
 export const ADMIN_NAV: NavItem[] = [
-  { href: "/admin", label: "Overview", icon: BarChart3 },
-  { href: "/admin/patients", label: "Patients", icon: Users },
-  { href: "/admin/boxes", label: "Boxes", icon: Package },
+  { href: "/admin", labelKey: "overview", icon: BarChart3 },
+  { href: "/admin/patients", labelKey: "patients", icon: Users },
+  { href: "/admin/boxes", labelKey: "boxes", icon: Package },
 ];
 
 export function Sidebar({
   navItems = PATIENT_NAV,
-  sectionLabel = "Patient space",
+  sectionLabelKey = "patientSpace",
   settingsHref = "/dashboard/settings",
 }: {
   navItems?: NavItem[];
-  sectionLabel?: string;
+  sectionLabelKey?: string;
   settingsHref?: string;
 }) {
   const pathname = usePathname();
+  const t = useTranslations("nav");
 
   return (
     <aside className="sticky top-0 flex h-screen w-[250px] shrink-0 flex-col border-r border-border bg-card">
@@ -58,10 +62,10 @@ export function Sidebar({
 
       <div className="px-3.5">
         <p className="px-2.5 pt-2 pb-3 text-[11px] font-bold tracking-wide text-faint uppercase">
-          {sectionLabel}
+          {t(sectionLabelKey)}
         </p>
         <nav className="flex flex-col gap-1">
-          {navItems.map(({ href, label, icon: Icon }) => {
+          {navItems.map(({ href, labelKey, icon: Icon }) => {
             const active =
               href === "/dashboard" || href === "/admin"
                 ? pathname === href
@@ -82,7 +86,7 @@ export function Sidebar({
                   strokeWidth={active ? 2 : 1.7}
                   className={active ? "text-primary" : "text-muted-foreground"}
                 />
-                {label}
+                {t(labelKey)}
               </Link>
             );
           })}
@@ -95,7 +99,7 @@ export function Sidebar({
           className="flex items-center gap-3 rounded-[11px] px-3 py-2.5 text-sm font-semibold text-muted-foreground hover:bg-muted"
         >
           <Settings size={20} strokeWidth={1.7} />
-          Settings
+          {t("settings")}
         </Link>
       </div>
     </aside>

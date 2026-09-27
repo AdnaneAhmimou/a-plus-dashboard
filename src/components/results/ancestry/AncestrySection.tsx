@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { Globe2, Footprints, Info, ChevronDown } from "lucide-react";
 
+import { useTranslations } from "next-intl";
+
 import { Card } from "@/components/ui/card";
 import { SectionCard } from "@/components/results/blocks/SectionCard";
 import { haplogroupCoords, regionCoords } from "@/lib/dashboard/ancestry-geo";
@@ -17,11 +19,11 @@ import { NeanderthalTab } from "./NeanderthalTab";
 
 type TabId = "composition" | "maternal" | "paternal" | "neanderthal";
 
-const TABS: { id: TabId; label: string }[] = [
-  { id: "composition", label: "Ancestry composition" },
-  { id: "maternal", label: "Maternal lineage" },
-  { id: "paternal", label: "Paternal lineage" },
-  { id: "neanderthal", label: "Neanderthal" },
+const TABS: { id: TabId; key: string }[] = [
+  { id: "composition", key: "composition" },
+  { id: "maternal", key: "maternal" },
+  { id: "paternal", key: "paternal" },
+  { id: "neanderthal", key: "neanderthal" },
 ];
 
 // Composition is categorical (regions), so it uses the status hues as a
@@ -47,30 +49,31 @@ function formatPercent(value: number): string {
 
 export function AncestrySection({ profile }: { profile: AncestryProfileData }) {
   const [tab, setTab] = useState<TabId>("composition");
+  const t = useTranslations("ancestry");
 
   return (
     <div>
       <div
         role="tablist"
-        aria-label="Ancestry sections"
+        aria-label={t("composition")}
         className="bg-muted mb-6 inline-flex max-w-full flex-wrap gap-1 rounded-xl p-1"
       >
-        {TABS.map((t) => {
-          const active = t.id === tab;
+        {TABS.map((tt) => {
+          const active = tt.id === tab;
           return (
             <button
-              key={t.id}
+              key={tt.id}
               role="tab"
               type="button"
               aria-selected={active}
-              onClick={() => setTab(t.id)}
+              onClick={() => setTab(tt.id)}
               className={`rounded-lg px-4 py-2 text-sm font-bold transition-colors ${
                 active
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-muted-foreground hover:bg-secondary hover:text-foreground"
               }`}
             >
-              {t.label}
+              {t(tt.key)}
             </button>
           );
         })}
@@ -93,6 +96,7 @@ export function AncestrySection({ profile }: { profile: AncestryProfileData }) {
 /* ---------------------------------------------------------------- */
 
 function CompositionTab({ entries }: { entries: CompositionEntry[] }) {
+  const t = useTranslations("ancestry");
   const sorted = useMemo(
     () => [...entries].sort((a, b) => b.percent - a.percent),
     [entries]
@@ -129,9 +133,9 @@ function CompositionTab({ entries }: { entries: CompositionEntry[] }) {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-      <SectionCard icon={Globe2} title="Your ancestry composition">
+      <SectionCard icon={Globe2} title={t("yourComposition")}>
         <p className="mb-5 text-sm font-medium text-muted-foreground">
-          Share of your genome associated with each ancestral region.
+          {t("compositionHelp")}
         </p>
 
         <div
@@ -176,7 +180,7 @@ function CompositionTab({ entries }: { entries: CompositionEntry[] }) {
         <AncestryMap
           markers={markers}
           initialPhi={-0.2}
-          caption="Drag the globe to explore. Marker size follows the share."
+          caption={t("dragGlobe")}
         />
       </Card>
     </div>

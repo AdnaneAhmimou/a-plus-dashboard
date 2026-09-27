@@ -1,5 +1,7 @@
 import { CalendarCheck, FlaskConical, Layers, FileDown } from "lucide-react";
 
+import { useFormatter, useTranslations } from "next-intl";
+
 import { Card } from "@/components/ui/card";
 
 /**
@@ -25,29 +27,37 @@ export function ResultsSummary({
   readyAt?: Date | null;
   reportHref?: string;
 }) {
+  const t = useTranslations("results");
+  // Dates follow the interface language rather than a hardcoded locale:
+  // "19 Jul 2026" in English, "19 juil. 2026" in French, Arabic digits
+  // and month names in Arabic.
+  const format = useFormatter();
+
   return (
     <Card className="gap-0 p-6">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-3">
           <Stat
             icon={FlaskConical}
-            value={totalAnalyses.toLocaleString("en-US")}
-            label={totalAnalyses === 1 ? "analysis" : "analyses"}
+            value={String(totalAnalyses)}
+            label={t("analyses", { count: totalAnalyses })}
+            valueInLabel
           />
           <Stat
             icon={Layers}
             value={String(categoryCount)}
-            label={categoryCount === 1 ? "section" : "sections"}
+            label={t("sections", { count: categoryCount })}
+            valueInLabel
           />
           {readyAt && (
             <Stat
               icon={CalendarCheck}
-              value={readyAt.toLocaleDateString("en-GB", {
+              value={format.dateTime(readyAt, {
                 day: "numeric",
                 month: "short",
                 year: "numeric",
               })}
-              label="completed"
+              label={t("completed")}
             />
           )}
         </div>
@@ -58,16 +68,14 @@ export function ResultsSummary({
             className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
           >
             <FileDown size={16} strokeWidth={2} />
-            Download full report
+            {t("downloadReport")}
           </a>
         )}
       </div>
 
       {boxNumber && (
         <p className="mt-5 border-t border-border pt-4 text-xs font-medium text-muted-foreground">
-          Kit <span className="font-mono font-semibold text-foreground">{boxNumber}</span>
-          . Results are organised by section below. None of this is a
-          diagnosis; speak to a doctor about anything that concerns you.
+          {t("kitLine", { number: boxNumber })}
         </p>
       )}
     </Card>
@@ -78,11 +86,20 @@ function Stat({
   icon: Icon,
   value,
   label,
+  valueInLabel = false,
 }: {
   icon: typeof FlaskConical;
   value: string;
   label: string;
+  /**
+   * True when `label` is a pluralised message that already contains the
+   * number ("109 analyses", "109 تحليلاً"). The big figure then shows the
+   * number and the label shows only the word, which is stripped here
+   * rather than kept as a second translation key per unit.
+   */
+  valueInLabel?: boolean;
 }) {
+  const caption = valueInLabel ? label.replace(value, "").trim() : label;
   return (
     <div className="flex items-center gap-3">
       <span
@@ -97,7 +114,7 @@ function Stat({
           {value}
         </span>
         <span className="block text-xs font-semibold text-muted-foreground">
-          {label}
+          {caption}
         </span>
       </span>
     </div>

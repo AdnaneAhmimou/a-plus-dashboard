@@ -32,6 +32,12 @@ enum BoxStatus {
   AVAILABLE
   SENT
   ASSOCIATED
+  // The patient deleted their account, so the box is detached and its
+  // results are gone. It is NOT returned to AVAILABLE: the physical kit
+  // has been used, and leaving the number claimable would let a stranger
+  // who guessed it register against a box that once held someone's
+  // genetic data.
+  RETIRED
 }
 
 model Box {

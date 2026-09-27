@@ -55,7 +55,13 @@ export async function importBundle(
           variantCount: result.variantCount ?? null,
           riskLociCount: result.riskLociCount ?? null,
           genesAnalyzed: result.genesAnalyzed ?? null,
+          causesAndRiskFactors: result.causesAndRiskFactors ?? null,
+          symptoms: result.symptoms ?? null,
+          prevention: result.prevention ?? null,
+          diseaseManagement: result.diseaseManagement ?? null,
           technicalNotes: result.technicalNotes ?? null,
+          studyLimitations: result.studyLimitations ?? null,
+          bibliography: (result.bibliography ?? null) as Prisma.InputJsonValue,
           sourceUrl: result.url,
         };
 

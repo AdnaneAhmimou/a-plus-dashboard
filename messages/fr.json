@@ -1,0 +1,101 @@
+{
+  "nav": {
+    "patientSpace": "Espace patient",
+    "admin": "Administration",
+    "dashboard": "Tableau de bord",
+    "myResults": "Mes résultats",
+    "settings": "Paramètres",
+    "overview": "Vue d'ensemble",
+    "patients": "Patients",
+    "boxes": "Kits",
+    "searchPlaceholder": "Rechercher une analyse...",
+    "searchPatientsPlaceholder": "Rechercher un patient...",
+    "notifications": "Notifications",
+    "signOut": "Se déconnecter",
+    "patient": "Patient"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Préférences de votre compte.",
+    "language": "Langue",
+    "languageHelp": "Choisissez la langue de l'interface. Vos résultats conservent la langue dans laquelle ils ont été émis.",
+    "saved": "Langue mise à jour",
+    "account": "Compte",
+    "email": "E-mail",
+    "name": "Nom",
+    "role": "Rôle",
+    "kit": "Kit"
+  },
+  "results": {
+    "title": "Mes résultats",
+    "explore": "Explorer vos résultats",
+    "backToResults": "Retour aux résultats",
+    "analyses": "{count, plural, =0 {Aucune analyse} one {# analyse} other {# analyses}}",
+    "sections": "{count, plural, one {# section} other {# sections}}",
+    "completed": "terminé",
+    "downloadReport": "Télécharger le rapport complet",
+    "kitLine": "Kit {number}. Vos résultats sont organisés par section ci-dessous. Rien de tout cela n'est un diagnostic ; parlez-en à un médecin si quelque chose vous inquiète.",
+    "noneInCategory": "Aucune analyse dans cette catégorie pour le moment.",
+    "notReadyTitle": "Pas encore de résultats",
+    "notReadyBody": "Vos résultats apparaîtront ici dès que les analyses seront terminées.",
+    "readyTitle": "Vos résultats sont prêts",
+    "readyBody": "Téléchargez votre rapport ci-dessous. Votre laboratoire vous contactera si une suite est nécessaire.",
+    "trackProgress": "Suivez la progression de votre kit depuis le tableau de bord",
+    "originalPdf": "Rapport PDF d'origine",
+    "ancestryCard": "Composition, lignées et ADN néandertalien",
+    "noAncestry": "Aucun profil d'origines pour le moment. Il apparaîtra ici une fois l'analyse ajoutée."
+  },
+  "categories": {
+    "HEALTH_CONDITIONS": "Prédisposition génétique aux problèmes de santé",
+    "HEREDITARY_CONDITIONS": "Maladies héréditaires",
+    "PHARMACOLOGY": "Pharmacologie",
+    "TRAITS": "Caractères",
+    "WELLNESS": "Bien-être",
+    "ANCESTRY": "Origines"
+  },
+  "ancestry": {
+    "composition": "Composition des origines",
+    "maternal": "Lignée maternelle",
+    "paternal": "Lignée paternelle",
+    "neanderthal": "Néandertal",
+    "globe": "Globe",
+    "flat": "Plane",
+    "mapView": "Affichage de la carte",
+    "yourComposition": "La composition de vos origines",
+    "compositionHelp": "Part de votre génome associée à chaque région d'origine.",
+    "dragGlobe": "Faites pivoter le globe pour explorer. La taille des points suit la part.",
+    "flatCaption": "Toutes les régions d'un coup d'œil. La rotation n'est possible que sur le globe."
+  },
+  "dashboard": {
+    "greeting": "Bonjour, {name}",
+    "boxLabel": "Kit",
+    "tracking": "Suivi du test ADN",
+    "resultsReady": "Vos résultats sont prêts",
+    "viewResults": "Consulter les résultats de votre test ADN"
+  },
+  "common": {
+    "loading": "Chargement",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "yourResult": "Votre résultat"
+  },
+  "deleteAccount": {
+    "title": "Supprimer votre compte",
+    "description": "Cette action efface définitivement votre compte et vos données génétiques du Laboratoire A-Plus. Elle est irréversible et le laboratoire ne pourra pas les restaurer.",
+    "erases": {
+      "results": "Tous vos résultats ADN, dans chaque section",
+      "reports": "Vos rapports PDF et les données qui les accompagnent",
+      "account": "Votre compte, vos identifiants et vos notifications",
+      "kit": "Votre numéro de kit est retiré et ne pourra plus être enregistré"
+    },
+    "start": "Supprimer mon compte",
+    "passwordLabel": "Confirmez votre mot de passe",
+    "confirmLabel": "Saisissez {word} pour confirmer",
+    "confirmWord": "SUPPRIMER",
+    "confirmButton": "Supprimer définitivement",
+    "deleting": "Suppression...",
+    "cancel": "Annuler",
+    "genericError": "Le compte n'a pas pu être supprimé. Veuillez réessayer."
+  }
+}

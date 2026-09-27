@@ -377,7 +377,13 @@ export class TellmegenPortalSource implements ResultSource {
               variantCount: parsed.variantCount,
               riskLociCount: parsed.riskLociCount,
               genesAnalyzed: parsed.genesAnalyzed,
+              causesAndRiskFactors: parsed.causesAndRiskFactors,
+              symptoms: parsed.symptoms,
+              prevention: parsed.prevention,
+              diseaseManagement: parsed.diseaseManagement,
               technicalNotes: parsed.technicalNotes,
+              studyLimitations: parsed.studyLimitations,
+              bibliography: parsed.bibliography,
             });
           } catch (error) {
             warnings.push(

@@ -3,12 +3,9 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { prisma } from "@/lib/prisma";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
+import { getTranslations } from "next-intl/server";
 
-const ROLE_LABEL: Record<string, string> = {
-  PATIENT: "Patient · A+",
-  ADMIN: "Admin · A+",
-  SUPER_ADMIN: "Super Admin · A+",
-};
+
 
 export default async function DashboardLayout({
   children,
@@ -22,6 +19,8 @@ export default async function DashboardLayout({
     where: { userId: user.id, read: false },
   });
 
+  const t = await getTranslations("nav");
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
@@ -29,7 +28,7 @@ export default async function DashboardLayout({
         <TopBar
           firstName={user.firstName}
           lastName={user.lastName}
-          roleLabel={ROLE_LABEL[user.role] ?? "Patient · A+"}
+          roleLabel={`${t("patient")} · A+`}
           notificationHref="/dashboard/notifications"
           unreadCount={unreadCount}
         />

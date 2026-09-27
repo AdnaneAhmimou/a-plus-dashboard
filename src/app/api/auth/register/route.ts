@@ -39,6 +39,15 @@ export async function POST(req: NextRequest) {
       409
     );
   }
+  // A retired box belonged to someone who deleted their account. Its
+  // userId is null, so without this check the number would look free and
+  // whoever knew it could register against a used kit.
+  if (box.status === "RETIRED") {
+    return errorResponse(
+      "This box is no longer active. Please contact the laboratory.",
+      409
+    );
+  }
 
   const passwordHash = await hashPassword(password);
 

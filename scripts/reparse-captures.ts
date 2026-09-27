@@ -5,6 +5,8 @@
 //
 //   npx tsx scripts/reparse-captures.ts [--import <id>] [--dry-run]
 
+import { Prisma } from "@prisma/client";
+
 import { prisma } from "../src/lib/prisma";
 import { parseDetailText } from "../src/lib/import/parse-detail";
 
@@ -40,10 +42,21 @@ async function main() {
       variantCount: parsed.variantCount ?? null,
       riskLociCount: parsed.riskLociCount ?? null,
       genesAnalyzed: parsed.genesAnalyzed ?? null,
+      causesAndRiskFactors: parsed.causesAndRiskFactors ?? null,
+      symptoms: parsed.symptoms ?? null,
+      prevention: parsed.prevention ?? null,
+      diseaseManagement: parsed.diseaseManagement ?? null,
       technicalNotes: parsed.technicalNotes ?? null,
+      studyLimitations: parsed.studyLimitations ?? null,
+      // Prisma's Json column takes DbNull rather than a bare null to
+      // mean "no value" as opposed to the JSON literal null.
+      bibliography: (parsed.bibliography ??
+        Prisma.DbNull) as Prisma.InputJsonValue,
     };
-    const differs = Object.entries(next).some(
-      ([k, v]) => existing[k as keyof typeof next] !== v
+    const differs = Object.entries(next).some(([k, v]) =>
+      k === "bibliography"
+        ? JSON.stringify(existing.bibliography ?? null) !== JSON.stringify(v)
+        : existing[k as keyof typeof existing] !== v
     );
     if (!differs) continue;
 

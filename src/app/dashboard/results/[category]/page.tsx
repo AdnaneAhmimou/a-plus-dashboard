@@ -2,12 +2,14 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 
+import { getTranslations } from "next-intl/server";
+
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { prisma } from "@/lib/prisma";
 import { ResultsList } from "@/components/results/ResultsList";
 import { AncestrySection } from "@/components/results/ancestry/AncestrySection";
 import { toAncestryProfileData } from "@/lib/dashboard/ancestry-profile";
-import { CATEGORY_META, categoryFromSlug } from "@/lib/dashboard/analysis-categories";
+import { categoryFromSlug } from "@/lib/dashboard/analysis-categories";
 
 export default async function PatientCategoryResultsPage({
   params,
@@ -28,6 +30,10 @@ export default async function PatientCategoryResultsPage({
       ? await prisma.ancestryProfile.findUnique({ where: { boxId: user.box.id } })
       : null;
 
+  const t = await getTranslations("results");
+  const tc = await getTranslations("categories");
+  const nav = await getTranslations("nav");
+
   const results = user.box && category !== "ANCESTRY"
     ? await prisma.analysisResult.findMany({
         where: { boxId: user.box.id, category },
@@ -43,15 +49,15 @@ export default async function PatientCategoryResultsPage({
         className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-primary"
       >
         <ChevronLeft size={16} />
-        Back to results
+        {t("backToResults")}
       </Link>
 
       <div className="mb-6">
         <p className="mb-2 text-xs font-bold tracking-wide text-primary uppercase">
-          Patient space
+          {nav("patientSpace")}
         </p>
         <h1 className="font-display text-[26px] font-extrabold tracking-[-0.6px] text-foreground">
-          {CATEGORY_META[category].label}
+          {tc(category)}
         </h1>
       </div>
 
@@ -60,8 +66,7 @@ export default async function PatientCategoryResultsPage({
           <AncestrySection profile={toAncestryProfileData(ancestry)} />
         ) : (
           <p className="text-sm font-medium text-muted-foreground">
-            No ancestry profile yet. It will appear here once your ancestry
-            analysis has been added.
+            {t("noAncestry")}
           </p>
         )
       ) : (

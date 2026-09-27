@@ -14,7 +14,85 @@ export interface ParsedDetail {
   variantCount?: string;
   riskLociCount?: number;
   genesAnalyzed?: string;
+
+  // The explanatory sections, sliced verbatim. These are what a patient
+  // actually reads — what the condition is, what raises the risk, how to
+  // lower it — and the reason the detail page is worth opening at all.
+  causesAndRiskFactors?: string;
+  symptoms?: string;
+  prevention?: string;
+  diseaseManagement?: string;
   technicalNotes?: string;
+  studyLimitations?: string;
+  bibliography?: { label: string }[];
+}
+
+// The portal prints the same literal headers as the source PDFs, in
+// whatever order a given report happens to use them, so the same table
+// drives both parsers. Text between one header and the next belongs to
+// that section; nothing is rewritten or summarised.
+type SectionKey =
+  | "causesAndRiskFactors"
+  | "symptoms"
+  | "prevention"
+  | "diseaseManagement"
+  | "technicalNotes"
+  | "studyLimitations"
+  | "bibliography";
+
+const SECTION_HEADERS: { key: SectionKey; pattern: RegExp }[] = [
+  { key: "causesAndRiskFactors", pattern: /^Causes and non-genetic risk factors$/i },
+  { key: "symptoms", pattern: /^Symptoms$/i },
+  { key: "prevention", pattern: /^Prevention$/i },
+  { key: "diseaseManagement", pattern: /^Disease management$/i },
+  { key: "technicalNotes", pattern: /^Technical report$/i },
+  { key: "bibliography", pattern: /^Bibliography$/i },
+  { key: "studyLimitations", pattern: /^Study limitations$/i },
+];
+
+/**
+ * Slices the page into its named sections. A line that exactly matches a
+ * header opens a section and closes the previous one; everything before
+ * the first header belongs to no section and is dropped here (the
+ * description is taken separately, above the result headline).
+ */
+function extractSections(lines: string[]): Partial<Record<SectionKey, string[]>> {
+  const out: Partial<Record<SectionKey, string[]>> = {};
+  let current: SectionKey | null = null;
+
+  for (const raw of lines) {
+    const line = raw.trim();
+    const header = SECTION_HEADERS.find((h) => h.pattern.test(line));
+    if (header) {
+      current = header.key;
+      out[current] ??= [];
+      continue;
+    }
+    if (!current || !line) continue;
+    // The portal leaves loading strips and untranslated keys in the
+    // rendered text; neither belongs in a patient-facing section.
+    if (/^Loading\.\.\./.test(line) || /^private\./.test(line)) continue;
+    out[current]!.push(line);
+  }
+
+  return out;
+}
+
+/** Citations wrap across lines, so a line ending in "." or "]" closes one. */
+function joinCitations(lines: string[]): { label: string }[] {
+  const entries: { label: string }[] = [];
+  let buffer: string[] = [];
+  for (const line of lines) {
+    buffer.push(line);
+    if (/[.\]]\s*$/.test(line)) {
+      const label = buffer.join(" ").trim();
+      if (label) entries.push({ label });
+      buffer = [];
+    }
+  }
+  const rest = buffer.join(" ").trim();
+  if (rest) entries.push({ label: rest });
+  return entries;
 }
 
 // The headline line varies by section: "Your risk is" for conditions,
@@ -24,9 +102,6 @@ const HEADLINE =
   /^\s*Your (?:risk is|result is|genetic results indicate|genotype indicates)\s*$/im;
 
 const I18N_KEY = /^(?:item|private|common)\.[\w.]+$/;
-
-const TECHNICAL_MARKERS =
-  /^(These results have been obtained|Technical report|The analysis of)/im;
 
 export function parseDetailText(raw: string): ParsedDetail {
   const text = raw.replace(/\r/g, "");
@@ -89,10 +164,15 @@ export function parseDetailText(raw: string): ParsedDetail {
       .find((l) => /^[A-Z0-9][A-Z0-9\- ]{2,}$/.test(l) && /[A-Z]{2}/.test(l));
   }
 
-  const technicalMatch = TECHNICAL_MARKERS.exec(text);
-  const technicalNotes = technicalMatch
-    ? clean(text.slice(technicalMatch.index))
-    : undefined;
+  const sections = extractSections(lines);
+  const sectionText = (key: SectionKey) => {
+    const value = sections[key]?.join("\n\n").trim();
+    return value && value.length > 0 ? value : undefined;
+  };
+
+  const bibliographyLines = sections.bibliography ?? [];
+  const bibliography =
+    bibliographyLines.length > 0 ? joinCitations(bibliographyLines) : undefined;
 
   // The population-context sentence, where the section has one.
   const resultContext = text
@@ -107,7 +187,13 @@ export function parseDetailText(raw: string): ParsedDetail {
     variantCount,
     riskLociCount,
     genesAnalyzed,
-    technicalNotes,
+    causesAndRiskFactors: sectionText("causesAndRiskFactors"),
+    symptoms: sectionText("symptoms"),
+    prevention: sectionText("prevention"),
+    diseaseManagement: sectionText("diseaseManagement"),
+    technicalNotes: sectionText("technicalNotes"),
+    studyLimitations: sectionText("studyLimitations"),
+    bibliography,
   };
 }
 

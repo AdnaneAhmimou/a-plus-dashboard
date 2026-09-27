@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Search, Bell, LogOut } from "lucide-react";
 
+import { useTranslations } from "next-intl";
+
 import { LogoutButton } from "@/components/auth/LogoutButton";
 
 function initials(firstName: string, lastName: string) {
@@ -10,9 +12,11 @@ function initials(firstName: string, lastName: string) {
 function NotificationBell({
   href,
   unreadCount,
+  label,
 }: {
   href?: string;
   unreadCount?: number;
+  label: string;
 }) {
   const badge =
     unreadCount && unreadCount > 0 ? (
@@ -25,7 +29,7 @@ function NotificationBell({
 
   if (href) {
     return (
-      <Link href={href} className="relative text-ink-soft" aria-label="Notifications">
+      <Link href={href} className="relative text-ink-soft" aria-label={label}>
         <Bell size={22} strokeWidth={1.7} />
         {badge}
       </Link>
@@ -33,7 +37,7 @@ function NotificationBell({
   }
 
   return (
-    <button type="button" className="relative text-ink-soft" aria-label="Notifications">
+    <button type="button" className="relative text-ink-soft" aria-label={label}>
       <Bell size={22} strokeWidth={1.7} />
       {badge}
     </button>
@@ -44,17 +48,21 @@ export function TopBar({
   firstName,
   lastName,
   roleLabel,
-  searchPlaceholder = "Search an analysis...",
+  searchPlaceholderKey = "searchPlaceholder",
   notificationHref,
   unreadCount,
 }: {
   firstName: string;
   lastName: string;
+  /** Already-translated, since the role wording differs per area. */
   roleLabel: string;
-  searchPlaceholder?: string;
+  /** Key under "nav"; the admin bar searches patients, not analyses. */
+  searchPlaceholderKey?: "searchPlaceholder" | "searchPatientsPlaceholder";
   notificationHref?: string;
   unreadCount?: number;
 }) {
+  const t = useTranslations("nav");
+
   return (
     <div className="sticky top-0 z-20 flex items-center gap-4 border-b border-border bg-background px-8 py-4">
       <div className="relative w-80 max-w-[45vw]">
@@ -64,13 +72,17 @@ export function TopBar({
           className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-faint"
         />
         <input
-          placeholder={searchPlaceholder}
+          placeholder={t(searchPlaceholderKey)}
           className="w-full rounded-[11px] border border-border bg-card py-2.5 pr-3 pl-10 text-sm font-medium text-foreground outline-none placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-ring/30"
         />
       </div>
 
       <div className="ml-auto flex items-center gap-5">
-        <NotificationBell href={notificationHref} unreadCount={unreadCount} />
+        <NotificationBell
+          href={notificationHref}
+          unreadCount={unreadCount}
+          label={t("notifications")}
+        />
 
         <div className="flex items-center gap-2.5">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-deep font-display text-[13px] font-bold text-white">

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import type { AnalysisCategory } from "@prisma/client";
 
+import { useTranslations } from "next-intl";
+
 import { Card } from "@/components/ui/card";
 import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/dashboard/analysis-categories";
 
@@ -12,6 +14,9 @@ export function CategoryGrid({
   basePath: string;
   counts: Partial<Record<AnalysisCategory, number>>;
 }) {
+  const t = useTranslations("categories");
+  const tr = useTranslations("results");
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {CATEGORY_ORDER.map((category) => {
@@ -36,16 +41,12 @@ export function CategoryGrid({
               </div>
               <div>
                 <div className="font-display text-[15px] leading-tight font-bold text-foreground">
-                  {meta.label}
+                  {t(category)}
                 </div>
                 <p className="mt-1.5 text-xs font-medium text-muted-foreground">
-                  {category === "ANCESTRY"
-                    ? count > 0
-                      ? "Composition, lineages and Neanderthal DNA"
-                      : "No ancestry profile yet"
-                    : count > 0
-                      ? `${count} ${count === 1 ? "analysis" : "analyses"}`
-                      : "No analyses yet"}
+                  {category === "ANCESTRY" && count > 0
+                    ? tr("ancestryCard")
+                    : tr("analyses", { count })}
                 </p>
               </div>
             </Card>

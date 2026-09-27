@@ -6,6 +6,8 @@ export const prismaMock = {
     findMany: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
+    delete: vi.fn(),
+    count: vi.fn(),
   },
   box: {
     findUnique: vi.fn(),
@@ -17,6 +19,7 @@ export const prismaMock = {
     findFirst: vi.fn(),
     findUnique: vi.fn(),
     create: vi.fn(),
+    deleteMany: vi.fn(),
   },
   analysisResult: {
     findMany: vi.fn(),
@@ -26,6 +29,17 @@ export const prismaMock = {
   courierEvent: {
     create: vi.fn(),
     findMany: vi.fn(),
+    deleteMany: vi.fn(),
+  },
+  ancestryProfile: {
+    findUnique: vi.fn(),
+    upsert: vi.fn(),
+    deleteMany: vi.fn(),
+  },
+  resultImport: {
+    create: vi.fn(),
+    update: vi.fn(),
+    deleteMany: vi.fn(),
   },
   notification: {
     findMany: vi.fn(),

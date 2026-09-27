@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Clock, FlaskConical } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/auth/current-user";
@@ -7,7 +8,6 @@ import { Card } from "@/components/ui/card";
 import { ReportList } from "@/components/reports/ReportList";
 import { CategoryGrid } from "@/components/results/CategoryGrid";
 import { ResultsSummary } from "@/components/results/ResultsSummary";
-import { KIT_STATUS_COPY } from "@/lib/dashboard/kit-status";
 import type { AnalysisCategory } from "@prisma/client";
 
 export default async function ResultsPage() {
@@ -46,15 +46,17 @@ export default async function ResultsPage() {
   const hasStructuredResults = categoryGroups.length > 0 || Boolean(ancestryProfile);
   const totalAnalyses = Object.values(categoryCounts).reduce((n, c) => n + (c ?? 0), 0);
   const latestReport = reports[0];
+  const t = await getTranslations("results");
+  const nav = await getTranslations("nav");
 
   return (
     <div>
       <div className="mb-6">
         <p className="mb-2 text-xs font-bold tracking-wide text-primary uppercase">
-          Patient space
+          {nav("patientSpace")}
         </p>
         <h1 className="font-display text-[28px] font-extrabold tracking-[-0.6px] text-foreground">
-          My Results
+          {t("title")}
         </h1>
       </div>
 
@@ -75,19 +77,17 @@ export default async function ResultsPage() {
 
             <div>
               <h2 className="font-display text-lg font-extrabold text-foreground">
-                {ready ? "Your results are ready" : "No results yet"}
+                {ready ? t("readyTitle") : t("notReadyTitle")}
               </h2>
               <p className="mx-auto mt-1.5 max-w-sm text-sm font-medium text-muted-foreground">
-                {ready
-                  ? "Download your report below. Your laboratory will be in touch with next steps if needed."
-                  : `${KIT_STATUS_COPY[kitStatus]}. Your results will appear here as soon as testing is complete.`}
+                {ready ? t("readyBody") : t("notReadyBody")}
               </p>
             </div>
 
             {!ready && (
               <div className="mt-1 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
                 <FlaskConical size={14} strokeWidth={1.8} />
-                Track your box&apos;s progress from the dashboard
+                {t("trackProgress")}
               </div>
             )}
           </div>
@@ -111,13 +111,13 @@ export default async function ResultsPage() {
           />
 
           <h2 className="mt-8 mb-4 font-display text-lg font-extrabold text-foreground">
-            Explore your results
+            {t("explore")}
           </h2>
           <CategoryGrid basePath="/dashboard/results" counts={categoryCounts} />
 
           <details className="mt-6">
             <summary className="cursor-pointer text-sm font-semibold text-muted-foreground hover:text-primary">
-              Original report PDF
+              {t("originalPdf")}
             </summary>
             <Card className="mt-3 p-6">
               <ReportList reports={reports} showUploader={false} />

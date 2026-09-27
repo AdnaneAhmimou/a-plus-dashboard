@@ -1,0 +1,101 @@
+{
+  "nav": {
+    "patientSpace": "Patient space",
+    "admin": "Admin",
+    "dashboard": "Dashboard",
+    "myResults": "My Results",
+    "settings": "Settings",
+    "overview": "Overview",
+    "patients": "Patients",
+    "boxes": "Boxes",
+    "searchPlaceholder": "Search an analysis...",
+    "searchPatientsPlaceholder": "Search a patient...",
+    "notifications": "Notifications",
+    "signOut": "Sign out",
+    "patient": "Patient"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Preferences for your account.",
+    "language": "Language",
+    "languageHelp": "Choose the language of the interface. Your results keep the language they were issued in.",
+    "saved": "Language updated",
+    "account": "Account",
+    "email": "Email",
+    "name": "Name",
+    "role": "Role",
+    "kit": "Kit"
+  },
+  "results": {
+    "title": "My Results",
+    "explore": "Explore your results",
+    "backToResults": "Back to results",
+    "analyses": "{count, plural, =0 {No analyses yet} one {# analysis} other {# analyses}}",
+    "sections": "{count, plural, one {# section} other {# sections}}",
+    "completed": "completed",
+    "downloadReport": "Download full report",
+    "kitLine": "Kit {number}. Results are organised by section below. None of this is a diagnosis; speak to a doctor about anything that concerns you.",
+    "noneInCategory": "No analyses in this category yet.",
+    "notReadyTitle": "No results yet",
+    "notReadyBody": "Your results will appear here as soon as testing is complete.",
+    "readyTitle": "Your results are ready",
+    "readyBody": "Download your report below. Your laboratory will be in touch with next steps if needed.",
+    "trackProgress": "Track your box's progress from the dashboard",
+    "originalPdf": "Original report PDF",
+    "ancestryCard": "Composition, lineages and Neanderthal DNA",
+    "noAncestry": "No ancestry profile yet. It will appear here once your ancestry analysis has been added."
+  },
+  "categories": {
+    "HEALTH_CONDITIONS": "Genetic vulnerability to health conditions",
+    "HEREDITARY_CONDITIONS": "Hereditary conditions",
+    "PHARMACOLOGY": "Pharmacology",
+    "TRAITS": "Traits",
+    "WELLNESS": "Wellness",
+    "ANCESTRY": "Ancestry"
+  },
+  "ancestry": {
+    "composition": "Ancestry composition",
+    "maternal": "Maternal lineage",
+    "paternal": "Paternal lineage",
+    "neanderthal": "Neanderthal",
+    "globe": "Globe",
+    "flat": "Flat",
+    "mapView": "Map view",
+    "yourComposition": "Your ancestry composition",
+    "compositionHelp": "Share of your genome associated with each ancestral region.",
+    "dragGlobe": "Drag the globe to explore. Marker size follows the share.",
+    "flatCaption": "Every region at once. Drag is only available on the globe."
+  },
+  "dashboard": {
+    "greeting": "Hello, {name}",
+    "boxLabel": "Box",
+    "tracking": "DNA Test Tracking",
+    "resultsReady": "Your results are ready",
+    "viewResults": "View your DNA test results"
+  },
+  "common": {
+    "loading": "Loading",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "yourResult": "Your result"
+  },
+  "deleteAccount": {
+    "title": "Delete your account",
+    "description": "This permanently erases your account and your genetic data from A-Plus Laboratory. It cannot be undone, and the laboratory cannot restore it for you.",
+    "erases": {
+      "results": "All of your DNA results, in every section",
+      "reports": "Your report PDFs and the data behind them",
+      "account": "Your account, sign-in details and notifications",
+      "kit": "Your kit number is retired and cannot be registered again"
+    },
+    "start": "Delete my account",
+    "passwordLabel": "Confirm your password",
+    "confirmLabel": "Type {word} to confirm",
+    "confirmWord": "DELETE",
+    "confirmButton": "Permanently delete",
+    "deleting": "Deleting...",
+    "cancel": "Cancel",
+    "genericError": "The account could not be deleted. Please try again."
+  }
+}

@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { useTranslations } from "next-intl";
+
 import { Card } from "@/components/ui/card";
 import { getSummaryTone, type ZoneTone } from "@/lib/dashboard/result-type";
 import { getResultIcon } from "@/lib/dashboard/result-icons";
@@ -17,6 +19,17 @@ const TONE_DOT_CLASS: Record<ZoneTone, string> = {
   info: "bg-info",
   neutral: "bg-muted-foreground",
 };
+
+function EmptyState() {
+  const t = useTranslations("results");
+  return (
+    <Card className="p-8 text-center">
+      <p className="text-sm font-medium text-muted-foreground">
+        {t("noneInCategory")}
+      </p>
+    </Card>
+  );
+}
 
 /**
  * A category's results as a grid of cards rather than one long list. A
@@ -38,13 +51,7 @@ export function ResultsList({
   basePath: string;
 }) {
   if (items.length === 0) {
-    return (
-      <Card className="p-8 text-center">
-        <p className="text-sm font-medium text-muted-foreground">
-          No analyses in this category yet.
-        </p>
-      </Card>
-    );
+    return <EmptyState />;
   }
 
   return (

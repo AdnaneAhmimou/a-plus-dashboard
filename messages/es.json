@@ -1,0 +1,101 @@
+{
+  "nav": {
+    "patientSpace": "Espacio del paciente",
+    "admin": "Administración",
+    "dashboard": "Panel",
+    "myResults": "Mis resultados",
+    "settings": "Ajustes",
+    "overview": "Resumen",
+    "patients": "Pacientes",
+    "boxes": "Kits",
+    "searchPlaceholder": "Buscar un análisis...",
+    "searchPatientsPlaceholder": "Buscar un paciente...",
+    "notifications": "Notificaciones",
+    "signOut": "Cerrar sesión",
+    "patient": "Paciente"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "subtitle": "Preferencias de tu cuenta.",
+    "language": "Idioma",
+    "languageHelp": "Elige el idioma de la interfaz. Tus resultados conservan el idioma en el que se emitieron.",
+    "saved": "Idioma actualizado",
+    "account": "Cuenta",
+    "email": "Correo electrónico",
+    "name": "Nombre",
+    "role": "Rol",
+    "kit": "Kit"
+  },
+  "results": {
+    "title": "Mis resultados",
+    "explore": "Explora tus resultados",
+    "backToResults": "Volver a los resultados",
+    "analyses": "{count, plural, =0 {Sin análisis todavía} one {# análisis} other {# análisis}}",
+    "sections": "{count, plural, one {# sección} other {# secciones}}",
+    "completed": "completado",
+    "downloadReport": "Descargar el informe completo",
+    "kitLine": "Kit {number}. Tus resultados están organizados por sección más abajo. Nada de esto es un diagnóstico; consulta a un médico si algo te preocupa.",
+    "noneInCategory": "Todavía no hay análisis en esta categoría.",
+    "notReadyTitle": "Aún no hay resultados",
+    "notReadyBody": "Tus resultados aparecerán aquí en cuanto terminen los análisis.",
+    "readyTitle": "Tus resultados están listos",
+    "readyBody": "Descarga tu informe abajo. Tu laboratorio se pondrá en contacto si hace falta algún paso más.",
+    "trackProgress": "Sigue el progreso de tu kit desde el panel",
+    "originalPdf": "Informe PDF original",
+    "ancestryCard": "Composición, linajes y ADN neandertal",
+    "noAncestry": "Todavía no hay perfil de ascendencia. Aparecerá aquí cuando se añada el análisis."
+  },
+  "categories": {
+    "HEALTH_CONDITIONS": "Predisposición genética a problemas de salud",
+    "HEREDITARY_CONDITIONS": "Enfermedades hereditarias",
+    "PHARMACOLOGY": "Farmacología",
+    "TRAITS": "Rasgos",
+    "WELLNESS": "Bienestar",
+    "ANCESTRY": "Ascendencia"
+  },
+  "ancestry": {
+    "composition": "Composición de ascendencia",
+    "maternal": "Linaje materno",
+    "paternal": "Linaje paterno",
+    "neanderthal": "Neandertal",
+    "globe": "Globo",
+    "flat": "Plano",
+    "mapView": "Vista del mapa",
+    "yourComposition": "Tu composición de ascendencia",
+    "compositionHelp": "Parte de tu genoma asociada a cada región de origen.",
+    "dragGlobe": "Arrastra el globo para explorar. El tamaño del punto sigue la proporción.",
+    "flatCaption": "Todas las regiones a la vez. Solo se puede arrastrar en el globo."
+  },
+  "dashboard": {
+    "greeting": "Hola, {name}",
+    "boxLabel": "Kit",
+    "tracking": "Seguimiento del test de ADN",
+    "resultsReady": "Tus resultados están listos",
+    "viewResults": "Ver los resultados de tu test de ADN"
+  },
+  "common": {
+    "loading": "Cargando",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "yourResult": "Tu resultado"
+  },
+  "deleteAccount": {
+    "title": "Eliminar tu cuenta",
+    "description": "Esto borra de forma permanente tu cuenta y tus datos genéticos del Laboratorio A-Plus. No se puede deshacer y el laboratorio no podrá restaurarlos.",
+    "erases": {
+      "results": "Todos tus resultados de ADN, en todas las secciones",
+      "reports": "Tus informes en PDF y los datos que los sustentan",
+      "account": "Tu cuenta, tus credenciales y tus notificaciones",
+      "kit": "Tu número de kit queda retirado y no podrá registrarse de nuevo"
+    },
+    "start": "Eliminar mi cuenta",
+    "passwordLabel": "Confirma tu contraseña",
+    "confirmLabel": "Escribe {word} para confirmar",
+    "confirmWord": "ELIMINAR",
+    "confirmButton": "Eliminar permanentemente",
+    "deleting": "Eliminando...",
+    "cancel": "Cancelar",
+    "genericError": "No se pudo eliminar la cuenta. Inténtalo de nuevo."
+  }
+}

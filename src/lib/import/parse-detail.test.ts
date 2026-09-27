@@ -49,3 +49,80 @@ describe("parseDetailText", () => {
     expect(parseDetailText(page).name).toBeUndefined();
   });
 });
+
+describe("parseDetailText — explanatory sections", () => {
+  const FULL_PAGE = `Genetic vulnerability to health conditions
+/
+Abdominal aortic aneurysm
+PDF
+Abdominal aortic aneurysm
+
+An aneurysm is an abnormal widening of an artery.
+
+Your risk is
+Medium risk
+
+Causes and non-genetic risk factors
+
+The exact causes of aortic aneurysm are unknown, although some environmental risk factors have been identified.
+
+Smoking.
+
+Symptoms
+
+Aneurysms can appear and develop without causing any symptoms, making them difficult to detect.
+
+Prevention
+
+Since, in most cases, aneurysms are asymptomatic, it is important that people at higher risk undergo imaging tests.
+
+In addition, it is generally recommended to avoid environmental risk factors such as smoking.
+
+Technical report
+
+Abdominal aortic aneurysm (AAA) is a complex disease influenced by environmental and genetic factors.
+
+Bibliography
+
+Klarin D, Verma SS, Judy R, et al. Genetic Architecture. Circulation. 2020.
+
+UK National Health Service [March 2022]
+
+Study limitations
+
+The presence of important environmental factors can influence the phenotypic outcome.
+
+The tellmeGen test is not diagnostic.
+`;
+
+  it("extracts every explanatory section, verbatim", () => {
+    const parsed = parseDetailText(FULL_PAGE);
+
+    expect(parsed.causesAndRiskFactors).toContain("environmental risk factors");
+    expect(parsed.causesAndRiskFactors).toContain("Smoking.");
+    expect(parsed.symptoms).toContain("without causing any symptoms");
+    expect(parsed.prevention).toContain("imaging tests");
+    expect(parsed.prevention).toContain("avoid environmental risk factors");
+    expect(parsed.technicalNotes).toContain("complex disease influenced by");
+    expect(parsed.studyLimitations).toContain("not diagnostic");
+  });
+
+  it("does not bleed one section's text into the next", () => {
+    const parsed = parseDetailText(FULL_PAGE);
+    expect(parsed.symptoms).not.toContain("imaging tests");
+    expect(parsed.prevention).not.toContain("complex disease");
+  });
+
+  it("splits bibliography into separate citations by trailing punctuation", () => {
+    const parsed = parseDetailText(FULL_PAGE);
+    expect(parsed.bibliography).toHaveLength(2);
+    expect(parsed.bibliography?.[0].label).toContain("Klarin D");
+    expect(parsed.bibliography?.[1].label).toBe("UK National Health Service [March 2022]");
+  });
+
+  it("returns undefined for a section the page never had", () => {
+    const parsed = parseDetailText(PAGE);
+    expect(parsed.prevention).toBeUndefined();
+    expect(parsed.bibliography).toBeUndefined();
+  });
+});
