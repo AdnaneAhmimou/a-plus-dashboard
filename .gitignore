@@ -46,3 +46,5 @@ tellmegen-export/
 # this to the repo root: a bare "results/" also matched
 # src/components/results/ and silently dropped it from the commit.
 /results/
+.vercel
+.env*

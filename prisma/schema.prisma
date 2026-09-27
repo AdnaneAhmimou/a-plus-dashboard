@@ -3,8 +3,15 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Prisma Postgres's DATABASE_URL is a `prisma+postgres://` Accelerate
+  // proxy URL: it pools and caches queries for the app, but it does not
+  // speak the raw Postgres wire protocol that `migrate deploy` needs.
+  // directUrl is Prisma Postgres's own direct `postgres://` connection
+  // string (labelled DATABASE_POSTGRES_URL on its own dashboard),
+  // used only for migrations, never by the running app.
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
