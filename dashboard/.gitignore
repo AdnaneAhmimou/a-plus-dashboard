@@ -1,0 +1,50 @@
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# env files
+.env
+.env*.local
+
+# Claude Code local settings
+.claude/
+
+# Internal/handoff docs — not meant for the public repo
+API_REFERENCE.md
+CHRONO_DIALI_HANDOFF.md
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# testing
+/coverage
+
+# vitest
+.vitest-result.json
+
+
+
+# tellmeGen portal scraping — credentials, saved session, exported patient data
+.env.tellmegen
+.tellmegen-session.json
+tellmegen-export/
+
+# Real patient DNA report PDFs used as parser fixtures — personal health
+# data, deliberately kept out of git history. The leading slash anchors
+# this to the repo root: a bare "results/" also matched
+# src/components/results/ and silently dropped it from the commit.
+/results/
+.vercel
+.env*
