@@ -5,6 +5,40 @@ import { getSessionFromRequest } from "@/lib/auth/session";
 import { verifyPassword } from "@/lib/auth/password";
 import { clearAuthCookies } from "@/lib/auth/cookies";
 import { errorResponse } from "@/lib/api-response";
+import { updateAccountSchema } from "@/lib/auth/validation";
+
+const accountSelect = {
+  id: true,
+  email: true,
+  firstName: true,
+  lastName: true,
+  phone: true,
+  role: true,
+  emailVerified: true,
+  addressLine1: true,
+  city: true,
+  country: true,
+  pushNotificationsEnabled: true,
+  emailNotificationsEnabled: true,
+} as const;
+
+export async function PATCH(req: NextRequest) {
+  const session = await getSessionFromRequest(req);
+  if (!session) return errorResponse("Not authenticated", 401);
+
+  const parsed = updateAccountSchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) {
+    return errorResponse("Validation failed", 400, parsed.error.flatten().fieldErrors);
+  }
+
+  const user = await prisma.user.update({
+    where: { id: session.sub },
+    data: parsed.data,
+    select: accountSelect,
+  });
+
+  return NextResponse.json({ user });
+}
 
 /**
  * Deletes the signed-in user's own account and their genetic data.

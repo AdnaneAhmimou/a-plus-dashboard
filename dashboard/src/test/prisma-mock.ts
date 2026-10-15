@@ -23,6 +23,7 @@ export const prismaMock = {
   },
   analysisResult: {
     findMany: vi.fn(),
+    findUnique: vi.fn(),
     deleteMany: vi.fn(),
     createMany: vi.fn(),
   },
@@ -58,6 +59,11 @@ export const prismaMock = {
     create: vi.fn(),
     findUnique: vi.fn(),
     update: vi.fn(),
+  },
+  pushToken: {
+    findMany: vi.fn(),
+    deleteMany: vi.fn(),
+    upsert: vi.fn(),
   },
   $transaction: vi.fn(async (ops: unknown) => {
     if (Array.isArray(ops)) return Promise.all(ops);

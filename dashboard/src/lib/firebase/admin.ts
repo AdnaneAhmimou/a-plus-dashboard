@@ -39,6 +39,12 @@ export async function sendPushToUser(
   const app = getAdminApp();
   if (!app) return;
 
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { pushNotificationsEnabled: true },
+  });
+  if (!user?.pushNotificationsEnabled) return;
+
   const tokens = await prisma.pushToken.findMany({
     where: { userId },
     select: { id: true, token: true },

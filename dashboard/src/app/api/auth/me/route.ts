@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionFromRequest } from "@/lib/auth/session";
 import { errorResponse } from "@/lib/api-response";
+import { isCourierConfigured } from "@/lib/courier/chrono-diali";
 
 export async function GET(req: NextRequest) {
   const session = await getSessionFromRequest(req);
@@ -19,7 +20,22 @@ export async function GET(req: NextRequest) {
       phone: true,
       role: true,
       emailVerified: true,
+      pushNotificationsEnabled: true,
+      emailNotificationsEnabled: true,
       createdAt: true,
+      addressLine1: true,
+      city: true,
+      box: {
+        select: {
+          number: true,
+          kitStatus: true,
+          pickupRequestedAt: true,
+          pickedUpAt: true,
+          inTransitAt: true,
+          testingAt: true,
+          resultsReadyAt: true,
+        },
+      },
     },
   });
 
@@ -27,5 +43,12 @@ export async function GET(req: NextRequest) {
     return errorResponse("Not authenticated", 401);
   }
 
-  return NextResponse.json({ user });
+  // Not consumed by the web app (it reads the user straight off Prisma in
+  // server components — see getCurrentUser) — box/address/courier are
+  // additive here only for the mobile client, which has no equivalent
+  // server-side access and needs this over the wire.
+  return NextResponse.json({
+    user,
+    courierConfigured: isCourierConfigured(),
+  });
 }

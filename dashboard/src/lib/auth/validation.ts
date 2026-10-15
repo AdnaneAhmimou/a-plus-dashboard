@@ -55,3 +55,23 @@ export const changePasswordSchema = z.object({
   newPassword: passwordSchema,
 });
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
+export const updateAccountSchema = z
+  .object({
+    firstName: z.string().trim().min(1).max(100).optional(),
+    lastName: z.string().trim().min(1).max(100).optional(),
+    phone: z.string().trim().max(30).optional(),
+    addressLine1: z.string().trim().max(200).optional(),
+    city: z.string().trim().max(100).optional(),
+    country: z.string().trim().max(100).optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one account field is required",
+  });
+
+export type UpdateAccountInput = z.infer<typeof updateAccountSchema>;
+
+export const notificationPreferencesSchema = z.object({
+  pushNotificationsEnabled: z.boolean(),
+  emailNotificationsEnabled: z.boolean(),
+});

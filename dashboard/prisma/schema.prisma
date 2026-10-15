@@ -316,6 +316,8 @@ model User {
   phone         String?
   role          Role      @default(PATIENT)
   emailVerified Boolean   @default(false)
+  pushNotificationsEnabled  Boolean @default(true)
+  emailNotificationsEnabled Boolean @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
